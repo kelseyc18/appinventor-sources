@@ -2422,6 +2422,10 @@ public interface OdeMessages extends Messages {
   @Description("")
   String cameraComponentPallette();
 
+  @DefaultMessage("ImageClassifier")
+  @Description("")
+  String imageClassifierComponentPallette();
+
   @DefaultMessage("ImagePicker")
   @Description("")
   String imagePickerComponentPallette();
@@ -4761,6 +4765,14 @@ public interface OdeMessages extends Messages {
   @Description("")
   String SensorValueChangedEvents();
 
+  @DefaultMessage("GotClassification")
+  @Description("")
+  String GotClassificationEvents();
+
+  @DefaultMessage("AfterTraining")
+  @Description("")
+  String AfterTrainingEvents();
+
   //Methods
   @DefaultMessage("ResolveActivity")
   @Description("")
@@ -5907,6 +5919,10 @@ public interface OdeMessages extends Messages {
   @Description("")
   String HorizontalScrollArrangementHelpStringComponentPallette();
 
+  @DefaultMessage("Component for classifying images.")
+  @Description("")
+  String ImageClassifierHelpStringComponentPallette();
+
   @DefaultMessage("Component for displaying images.  The picture to display, and other aspects of the Image\"s appearance, can be specified in the Designer or in the Blocks Editor.")
   @Description("")
   String ImageHelpStringComponentPallette();
@@ -6616,6 +6632,10 @@ public interface OdeMessages extends Messages {
   @Description("On map ready, do...")
   String ReadyEvents();
 
+  @DefaultMessage("ClassifierReady")
+  @Description("On classifier ready, do...")
+  String ClassifierReadyEvents();
+
   @DefaultMessage("ZoomChange")
   @Description("On zoom change, do...")
   String ZoomChangeEvents();
@@ -6934,6 +6954,14 @@ public interface OdeMessages extends Messages {
   @Description("")
   String errorMessageParams();
 
+  @DefaultMessage("errorCode")
+  @Description("")
+  String errorCodeParams();
+
+  @DefaultMessage("data")
+  @Description("")
+  String dataParams();
+
   @DefaultMessage("Rectangle")
   @Description("")
   String rectangleComponentPallette();
@@ -7003,4 +7031,12 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("SetCenter")
   @Description("")
   String SetCenterMethods();
+
+  @DefaultMessage("Classify")
+  @Description("")
+  String ClassifyMethods();
+
+  @DefaultMessage("Train")
+  @Description("")
+  String TrainMethods();
 }
