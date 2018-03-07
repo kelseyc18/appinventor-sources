@@ -1122,9 +1122,9 @@ public class YaVersion {
   // - ClearCaches method was added
   public static final int WEBVIEWER_COMPONENT_VERSION = 6;
 
-  // For IMAGECLASSIFIER_COMPONENT_VERSION 1:
+  // For DEEPLEARNJS_COMPONENT_VERSION 1:
   // - Initial version.
-  public static final int IMAGECLASSIFIER_COMPONENT_VERSION = 1;
+  public static final int DEEPLEARNJS_COMPONENT_VERSION = 1;
 
   // For MEDIASTORE_COMPONENT_VERSION 1:
   // - Initial Version.

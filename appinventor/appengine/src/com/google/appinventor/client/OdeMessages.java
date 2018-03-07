@@ -2422,9 +2422,9 @@ public interface OdeMessages extends Messages {
   @Description("")
   String cameraComponentPallette();
 
-  @DefaultMessage("ImageClassifier")
+  @DefaultMessage("DeepLearnJS")
   @Description("")
-  String imageClassifierComponentPallette();
+  String deepLearnJSComponentPallette();
 
   @DefaultMessage("ImagePicker")
   @Description("")
@@ -4769,6 +4769,10 @@ public interface OdeMessages extends Messages {
   @Description("")
   String GotClassificationEvents();
 
+  @DefaultMessage("ClassificationFailed")
+  @Description("")
+  String ClassificationFailedEvents();
+
   @DefaultMessage("AfterTraining")
   @Description("")
   String AfterTrainingEvents();
@@ -5855,6 +5859,10 @@ public interface OdeMessages extends Messages {
   @Description("")
   String DatePickerHelpStringComponentPallette();
 
+  @DefaultMessage("Component for classifying images.")
+  @Description("")
+  String DeepLearnJSHelpStringComponentPallette();
+
   @DefaultMessage("An EmailPicker is a kind of text box.  If the user begins entering the name or email address of a contact, the phone will show a dropdown menu of choices that complete the entry.  If there are many contacts, the dropdown can take several seconds to appear, and can show intermediate results while the matches are being computed. <p>The initial contents of the text box and the contents< after user entry is in the <code>Text</code> property.  If the <code>Text</code> property is initially empty, the contents of the <code>Hint</code> property will be faintly shown in the text box as a hint to the user.</p>\n <p>Other properties affect the appearance of the text box (<code>TextAlignment</code>, <code>BackgroundColor</code>, etc.) and whether it can be used (<code>Enabled</code>).</p>\n<p>Text boxes like this are usually used with <code>Button</code> components, with the user clicking on the button when text entry is complete.")
   @Description("")
   String EmailPickerHelpStringComponentPallette();
@@ -5918,10 +5926,6 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("<p>A formatting element in which to place components that should be displayed from left to right.  If you wish to have components displayed one over another, use <code>VerticalArrangement</code> instead.</p><p>This version is scrollable.,")
   @Description("")
   String HorizontalScrollArrangementHelpStringComponentPallette();
-
-  @DefaultMessage("Component for classifying images.")
-  @Description("")
-  String ImageClassifierHelpStringComponentPallette();
 
   @DefaultMessage("Component for displaying images.  The picture to display, and other aspects of the Image\"s appearance, can be specified in the Designer or in the Blocks Editor.")
   @Description("")
@@ -6962,6 +6966,14 @@ public interface OdeMessages extends Messages {
   @Description("")
   String dataParams();
 
+  @DefaultMessage("sample")
+  @Description("")
+  String sampleParams();
+
+  @DefaultMessage("label")
+  @Description("")
+  String labelParams();
+
   @DefaultMessage("Rectangle")
   @Description("")
   String rectangleComponentPallette();
@@ -7039,4 +7051,20 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Train")
   @Description("")
   String TrainMethods();
+
+  @DefaultMessage("TrainSample")
+  @Description("")
+  String TrainSampleMethods();
+
+  @DefaultMessage("Load")
+  @Description("")
+  String LoadMethods();
+
+  @DefaultMessage("StartTraining")
+  @Description("")
+  String StartTrainingMethods();
+
+  @DefaultMessage("StopTraining")
+  @Description("")
+  String StopTrainingMethods();
 }
