@@ -51,6 +51,18 @@ public final class MockWebViewer extends MockVisibleComponent {
     initComponent(webViewerWidget);
   }
 
+  public MockWebViewer(SimpleEditor editor, String type) {
+    super(editor, type, images.webviewer());
+
+    // Initialize mock WebViewer UI
+    SimplePanel webViewerWidget = new SimplePanel();
+    webViewerWidget.setStylePrimaryName("ode-SimpleMockContainer");
+    // TODO(halabelson): Center vertically as well as horizontally
+    webViewerWidget.addStyleDependentName("centerContents");
+    webViewerWidget.setWidget(largeImage);
+    initComponent(webViewerWidget);
+  }
+
   // If these are not here, then we don't see the icon as it's
   // being dragged from the pelette
   @Override

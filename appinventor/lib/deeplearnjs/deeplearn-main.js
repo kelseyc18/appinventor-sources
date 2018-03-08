@@ -9,9 +9,11 @@ const squeezeNet = new squeezenet.SqueezeNet(math);
 async function lol() {
   await squeezeNet.load();
 
+  console.log("DeepLearnJS: deeplearn-main.js load");
   DeepLearnJS.ready();
 }
 
+console.log("DeepLearnJS: deeplearn-main.js start");
 lol();
 
 async function infer(imageData) {

@@ -614,6 +614,7 @@ public final class Compiler {
           out.write("  <uses-feature android:name=\"android.hardware.camera\" android:required=\"false\" />\n");
           out.write("  <uses-feature android:name=\"android.hardware.camera.autofocus\" android:required=\"false\" />\n");
           out.write("  <uses-feature android:name=\"android.hardware.wifi\" />\n"); // We actually require wifi
+          out.write("  <uses-feature android:glEsVersion=\"0x00020000\" android:required=\"false\" />");
       }
 
       int minSdk = Integer.parseInt((project.getMinSdk() == null) ? DEFAULT_MIN_SDK : project.getMinSdk());
@@ -627,6 +628,7 @@ public final class Compiler {
           }
         }
       }
+      minSdk = 22;
 
       // make permissions unique by putting them in one set
       Set<String> permissions = Sets.newHashSet();
@@ -663,6 +665,7 @@ public final class Compiler {
         out.write("android:label=\"" + aName + "\" ");
       }
       out.write("android:icon=\"@drawable/ya\" ");
+      out.write("android:hardwareAccelerated=\"true\" ");
       if (isForCompanion) {              // This is to hook into ACRA
         out.write("android:name=\"com.google.appinventor.components.runtime.ReplApplication\" ");
       } else {

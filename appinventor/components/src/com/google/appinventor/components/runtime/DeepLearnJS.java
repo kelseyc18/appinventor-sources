@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.Base64;
 import android.util.Log;
+import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
@@ -28,15 +29,16 @@ import java.io.IOException;
  */
 
 @DesignerComponent(version = YaVersion.DEEPLEARNJS_COMPONENT_VERSION,
-        category = ComponentCategory.EXPERIMENTAL, nonVisible = true,
+        category = ComponentCategory.EXPERIMENTAL, nonVisible = false,
         description = "Component for classifying images.")
 @SimpleObject
 @UsesAssets(fileNames = "deeplearnjs.html, deeplearn.js, deeplearn-main.js, deeplearn-squeeze.js")
 @UsesPermissions(permissionNames = "android.permission.INTERNET")
-public final class DeepLearnJS extends AndroidNonvisibleComponent implements Component {
+public final class DeepLearnJS extends AndroidViewComponent implements Component {
     private static final String LOG_TAG = DeepLearnJS.class.getSimpleName();
 
     private final WebView webview;
+    private final Form form;
 
     /**
      * Creates a new WebViewer component.
@@ -46,11 +48,14 @@ public final class DeepLearnJS extends AndroidNonvisibleComponent implements Com
     public DeepLearnJS(Form form) {
         super(form);
         webview = new WebView(form);
+        this.form = form;
         webview.getSettings().setJavaScriptEnabled(true);
         // adds a way to send strings to the javascript
         webview.addJavascriptInterface(new JsObject(), "DeepLearnJS");
-        webview.loadUrl("file:///android_assets/deeplearnjs.html");
+        webview.loadUrl("https://kelseyc18.github.io/appinventor-computervision/");
+//        webview.loadUrl("file:///android_assets/deeplearnjs.html");
         Log.d(LOG_TAG, "Created DeepLearnJS component");
+        form.$add(this);
     }
 
     /**
@@ -143,6 +148,11 @@ public final class DeepLearnJS extends AndroidNonvisibleComponent implements Com
     @SimpleEvent
     public void ClassificationFailed(int errorCode, String message) {
         EventDispatcher.dispatchEvent(this, "GotClassification", errorCode, message);
+    }
+
+    @Override
+    public View getView() {
+        return webview;
     }
 
     private class JsObject {
