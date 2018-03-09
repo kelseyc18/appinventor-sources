@@ -18,11 +18,14 @@ import com.google.appinventor.components.annotations.*;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.*;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Component for classifying images.
@@ -72,7 +75,7 @@ public final class DeepLearnJS extends AndroidViewComponent implements Component
 
         try {
             imageDrawable = MediaUtil.getBitmapDrawable(form.$form(), imagePath);
-            scaledImageBitmap = Bitmap.createScaledBitmap(imageDrawable.getBitmap(), 227, 227, false);
+            scaledImageBitmap = Bitmap.createScaledBitmap(imageDrawable.getBitmap(),227, 227, false);
         } catch (IOException ioe) {
             Log.e(LOG_TAG, "Unable to load " + imagePath);
         }
@@ -83,11 +86,14 @@ public final class DeepLearnJS extends AndroidViewComponent implements Component
         immagex.compress(Bitmap.CompressFormat.PNG, 100, baos);
         byte[] b = baos.toByteArray();
 
-        String imageEncodedbase64String = Base64.encodeToString(b, 0);
+        String imageEncodedbase64String = Base64.encodeToString(b, 0).replace("\n", "");
         Log.d(LOG_TAG, "imageEncodedbase64String: " + imageEncodedbase64String);
+        Log.d(LOG_TAG, "javascript: " + "try { infer(\"" + "placeholder" + "\"); } catch(e) { DeepLearnJS.reportError(4, e.toString()); }");
 
-        webview.evaluateJavascript("try { infer(" + imageEncodedbase64String +
-                ") } catch(e) { DeepLearnJS.reportError(4, e.toString()); }", new ValueCallback<String>() {
+        webview.evaluateJavascript("console.log(\"DeepLearnJs: Test evaluateJavascript\");", null);
+
+        webview.evaluateJavascript("try { console.log(\"DeepLearnJs: Before infer\"); infer(\"" + imageEncodedbase64String +
+                "\"); console.log(\"DeepLearnJs: After infer\"); } catch(e) { DeepLearnJS.reportError(4, e.toString()); }", new ValueCallback<String>() {
             @Override
             public void onReceiveValue(String s) {
                 Log.d(LOG_TAG, "Test result = " + s);
@@ -147,7 +153,7 @@ public final class DeepLearnJS extends AndroidViewComponent implements Component
 
     @SimpleEvent
     public void ClassificationFailed(int errorCode, String message) {
-        EventDispatcher.dispatchEvent(this, "GotClassification", errorCode, message);
+        EventDispatcher.dispatchEvent(this, "ClassificationFailed", errorCode, message);
     }
 
     @Override
@@ -168,16 +174,20 @@ public final class DeepLearnJS extends AndroidViewComponent implements Component
         }
 
         @JavascriptInterface
-        public void reportResult(String result) {
+        public void reportResult(final String result) {
             Log.d(LOG_TAG, "Entered reportResult: " + result);
             try {
                 Log.d(LOG_TAG, "Entered try of reportResult");
-                JSONObject object = new JSONObject(result);
-                final YailList resultList = YailList.makeList(JsonUtil.getListFromJsonObject(object));
+                JSONArray list = new JSONArray(result);
+                YailList intermediateList = YailList.makeList(JsonUtil.getListFromJsonArray(list));
+                final List resultList = new ArrayList();
+                for (int i = 0; i < intermediateList.size(); i++) {
+                    resultList.add(YailList.makeList((List) intermediateList.getObject(i)));
+                }
                 form.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        GotClassification(resultList);
+                        GotClassification(YailList.makeList(resultList));
                     }
                 });
             } catch (JSONException e) {
