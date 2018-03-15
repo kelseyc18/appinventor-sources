@@ -13,7 +13,10 @@ import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
+import android.webkit.WebViewClient;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
+import android.webkit.PermissionRequest;
 import com.google.appinventor.components.annotations.*;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.YaVersion;
@@ -53,9 +56,25 @@ public final class DeepLearnJS extends AndroidViewComponent implements Component
         webview = new WebView(form);
         this.form = form;
         webview.getSettings().setJavaScriptEnabled(true);
+        webview.getSettings().setMediaPlaybackRequiresUserGesture(false);
         // adds a way to send strings to the javascript
         webview.addJavascriptInterface(new JsObject(), "DeepLearnJS");
-        webview.loadUrl("https://kelseyc18.github.io/appinventor-computervision/");
+        webview.setWebViewClient(new WebViewClient());
+        webview.setWebChromeClient(new WebChromeClient() {
+          @Override
+          public void onPermissionRequest(PermissionRequest request) {
+            String[] requestedResources = request.getResources();
+            for (String r : requestedResources) {
+              if (r.equals(PermissionRequest.RESOURCE_VIDEO_CAPTURE)) {
+                request.grant(request.getResources());
+              }
+            }
+            //super.onPermissionRequest(request);
+            Log.d("DeepLearnJS", "onPermissionRequest called");
+          }
+        });
+        webview.loadUrl("https://kelseyc18.github.io/appinventor-computervision/live/");
+        //webview.loadUrl("https://kevin-vr.github.io/teachable-machine/");
 //        webview.loadUrl("file:///android_assets/deeplearnjs.html");
         Log.d(LOG_TAG, "Created DeepLearnJS component");
         form.$add(this);
@@ -99,6 +118,16 @@ public final class DeepLearnJS extends AndroidViewComponent implements Component
                 Log.d(LOG_TAG, "Test result = " + s);
             }
         });
+    }
+
+    @SimpleFunction
+    public void ClassifyImage() {
+      webview.evaluateJavascript("onSubmit();", null);
+    }
+
+    @SimpleFunction
+    public void ToggleCameraFacingMode() {
+      webview.evaluateJavascript("toggleCameraFacingMode();", null);
     }
 
     @SimpleFunction

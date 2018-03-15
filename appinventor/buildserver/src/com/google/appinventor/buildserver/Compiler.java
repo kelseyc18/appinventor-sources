@@ -640,6 +640,8 @@ public final class Compiler {
         out.write("  <uses-permission android:name=\"" + permission + "\" />\n");
       }
 
+      out.write("  <uses-permission android:name=\"android.permission.CAMERA\" />\n");
+
       if (isForCompanion) {      // This is so ACRA can do a logcat on phones older then Jelly Bean
         out.write("  <uses-permission android:name=\"android.permission.READ_LOGS\" />\n");
       }
