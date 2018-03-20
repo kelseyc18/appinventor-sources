@@ -73,7 +73,8 @@ public final class DeepLearnJS extends AndroidViewComponent implements Component
             Log.d("DeepLearnJS", "onPermissionRequest called");
           }
         });
-        webview.loadUrl("https://kelseyc18.github.io/appinventor-computervision/live/");
+        webview.loadUrl("https://kelseyc18.github.io/appinventor-computervision/");
+        //webview.loadUrl("https://kelseyc18.github.io/appinventor-computervision/image/");
         //webview.loadUrl("https://kevin-vr.github.io/teachable-machine/");
 //        webview.loadUrl("file:///android_assets/deeplearnjs.html");
         Log.d(LOG_TAG, "Created DeepLearnJS component");
@@ -94,7 +95,8 @@ public final class DeepLearnJS extends AndroidViewComponent implements Component
 
         try {
             imageDrawable = MediaUtil.getBitmapDrawable(form.$form(), imagePath);
-            scaledImageBitmap = Bitmap.createScaledBitmap(imageDrawable.getBitmap(),227, 227, false);
+            //scaledImageBitmap = Bitmap.createScaledBitmap(imageDrawable.getBitmap(), 227, 227, false);
+            scaledImageBitmap = Bitmap.createScaledBitmap(imageDrawable.getBitmap(), 500, (int) (imageDrawable.getBitmap().getHeight() * 500.0 / imageDrawable.getBitmap().getWidth()), false);
         } catch (IOException ioe) {
             Log.e(LOG_TAG, "Unable to load " + imagePath);
         }
@@ -107,11 +109,9 @@ public final class DeepLearnJS extends AndroidViewComponent implements Component
 
         String imageEncodedbase64String = Base64.encodeToString(b, 0).replace("\n", "");
         Log.d(LOG_TAG, "imageEncodedbase64String: " + imageEncodedbase64String);
-        Log.d(LOG_TAG, "javascript: " + "try { infer(\"" + "placeholder" + "\"); } catch(e) { DeepLearnJS.reportError(4, e.toString()); }");
+        Log.d(LOG_TAG, "javascript: " + "try { classifyImageData(\"" + "placeholder" + "\"); } catch(e) { DeepLearnJS.reportError(4, e.toString()); }");
 
-        webview.evaluateJavascript("console.log(\"DeepLearnJs: Test evaluateJavascript\");", null);
-
-        webview.evaluateJavascript("try { console.log(\"DeepLearnJs: Before infer\"); infer(\"" + imageEncodedbase64String +
+        webview.evaluateJavascript("try { console.log(\"DeepLearnJs: Before infer\"); classifyImageData(\"" + imageEncodedbase64String +
                 "\"); console.log(\"DeepLearnJs: After infer\"); } catch(e) { DeepLearnJS.reportError(4, e.toString()); }", new ValueCallback<String>() {
             @Override
             public void onReceiveValue(String s) {
@@ -121,13 +121,43 @@ public final class DeepLearnJS extends AndroidViewComponent implements Component
     }
 
     @SimpleFunction
-    public void ClassifyImage() {
-      webview.evaluateJavascript("onSubmit();", null);
+    public void StartVideo() {
+      webview.evaluateJavascript("start();", null);
+    }
+
+    @SimpleFunction
+    public void StopVideo() {
+      webview.evaluateJavascript("stop();", null);
     }
 
     @SimpleFunction
     public void ToggleCameraFacingMode() {
       webview.evaluateJavascript("toggleCameraFacingMode();", null);
+    }
+
+    @SimpleFunction
+    public void ClassifyVideoData() {
+      webview.evaluateJavascript("classifyVideoData();", null);
+    }
+
+    @SimpleFunction
+    public void ShowImage() {
+      webview.evaluateJavascript("showImage();", null);
+    }
+
+    @SimpleFunction
+    public void HideImage() {
+      webview.evaluateJavascript("hideImage();", null);
+    }
+
+    @SimpleFunction
+    public void SetInputMode(final String inputMode) {
+      webview.evaluateJavascript("setInputMode(\"" + inputMode + "\");", null);
+    }
+
+    @SimpleFunction
+    public void SetInputWidth(final int width) {
+      webview.evaluateJavascript("setInputWidth(" + width + ");", null);
     }
 
     @SimpleFunction

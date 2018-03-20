@@ -7048,13 +7048,37 @@ public interface OdeMessages extends Messages {
   @Description("")
   String ClassifyMethods();
 
-  @DefaultMessage("ClassifyImage")
+  @DefaultMessage("StartVideo")
   @Description("")
-  String ClassifyImageMethods();
+  String StartVideoMethods();
+
+  @DefaultMessage("StopVideo")
+  @Description("")
+  String StopVideoMethods();
 
   @DefaultMessage("ToggleCameraFacingMode")
   @Description("")
   String ToggleCameraFacingModeMethods();
+
+  @DefaultMessage("ClassifyVideoData")
+  @Description("")
+  String ClassifyVideoDataMethods();
+
+  @DefaultMessage("ShowImage")
+  @Description("")
+  String ShowImageMethods();
+
+  @DefaultMessage("HideImage")
+  @Description("")
+  String HideImageMethods();
+
+  @DefaultMessage("inputMode")
+  @Description("")
+  String inputModeParams();
+
+  @DefaultMessage("SetInputWidth")
+  @Description("")
+  String SetInputWidthMethods();
 
   @DefaultMessage("Train")
   @Description("")
