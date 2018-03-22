@@ -38,7 +38,7 @@ import java.util.List;
         category = ComponentCategory.EXPERIMENTAL, nonVisible = false,
         description = "Component for classifying images.")
 @SimpleObject
-@UsesAssets(fileNames = "test.html, deeplearnjs.html, deeplearn.js, deeplearn-main.js, deeplearn-squeeze.js")
+@UsesAssets(fileNames = "deeplearnjs.html, deeplearn.js, deeplearn-main.js, deeplearn-squeeze.js")
 @UsesPermissions(permissionNames = "android.permission.INTERNET")
 public final class DeepLearnJS extends AndroidViewComponent implements Component {
     private static final String LOG_TAG = DeepLearnJS.class.getSimpleName();
@@ -77,7 +77,7 @@ public final class DeepLearnJS extends AndroidViewComponent implements Component
         //webview.loadUrl("https://kelseyc18.github.io/appinventor-computervision/image/");
         //webview.loadUrl("https://kevin-vr.github.io/teachable-machine/");
         //webview.loadUrl("file:///android_assets/deeplearnjs.html");
-        webview.loadUrl("file:///android_asset/test.html");
+        webview.loadUrl("file:///android_asset/component/deeplearnjs.html");
         Log.d(LOG_TAG, "Created DeepLearnJS component");
         form.$add(this);
     }
