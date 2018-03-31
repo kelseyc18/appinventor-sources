@@ -406,8 +406,8 @@ public final class SimpleComponentDescriptor {
       return new MockVideoPlayer(editor);
     } else if (name.equals(MockWebViewer.TYPE)) {
       return new MockWebViewer(editor);
-    } else if (name.equals("DeepLearnJS")) {
-      return new MockWebViewer(editor, "DeepLearnJS");
+    } else if (name.equals("ComputerVision")) {
+      return new MockWebViewer(editor, "ComputerVision");
     } else if (name.equals("TeachableMachine")) {
       return new MockWebViewer(editor, "TeachableMachine");
     } else if (name.equals(MockSpinner.TYPE)) {

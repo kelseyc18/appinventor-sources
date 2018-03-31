@@ -2422,9 +2422,13 @@ public interface OdeMessages extends Messages {
   @Description("")
   String cameraComponentPallette();
 
-  @DefaultMessage("DeepLearnJS")
+  @DefaultMessage("ComputerVision")
   @Description("")
-  String deepLearnJSComponentPallette();
+  String computerVisionComponentPallette();
+
+  @DefaultMessage("TeachableMachine")
+  @Description("")
+  String teachableMachineComponentPallette();
 
   @DefaultMessage("ImagePicker")
   @Description("")
@@ -5861,7 +5865,11 @@ public interface OdeMessages extends Messages {
 
   @DefaultMessage("Component for classifying images.")
   @Description("")
-  String DeepLearnJSHelpStringComponentPallette();
+  String ComputerVisionHelpStringComponentPallette();
+
+  @DefaultMessage("Component for training and classifying video.")
+  @Description("")
+  String TeachableMachineHelpStringComponentPallette();
 
   @DefaultMessage("An EmailPicker is a kind of text box.  If the user begins entering the name or email address of a contact, the phone will show a dropdown menu of choices that complete the entry.  If there are many contacts, the dropdown can take several seconds to appear, and can show intermediate results while the matches are being computed. <p>The initial contents of the text box and the contents< after user entry is in the <code>Text</code> property.  If the <code>Text</code> property is initially empty, the contents of the <code>Hint</code> property will be faintly shown in the text box as a hint to the user.</p>\n <p>Other properties affect the appearance of the text box (<code>TextAlignment</code>, <code>BackgroundColor</code>, etc.) and whether it can be used (<code>Enabled</code>).</p>\n<p>Text boxes like this are usually used with <code>Button</code> components, with the user clicking on the button when text entry is complete.")
   @Description("")

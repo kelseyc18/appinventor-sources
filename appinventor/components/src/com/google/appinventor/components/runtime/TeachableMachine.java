@@ -192,15 +192,17 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
 
     }
 
+    /*
     @SimpleFunction
     public int GetSampleCount(final String label) {
-
+        return 0;
     }
 
     @SimpleFunction
     public float GetConfidence(final String label) {
-
+        return 0;
     }
+    */
 
     @SimpleEvent
     public void ClassifierReady() {

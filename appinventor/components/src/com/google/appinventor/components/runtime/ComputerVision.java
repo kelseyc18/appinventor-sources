@@ -34,14 +34,14 @@ import java.util.List;
  * Component for classifying images.
  */
 
-@DesignerComponent(version = YaVersion.DEEPLEARNJS_COMPONENT_VERSION,
+@DesignerComponent(version = YaVersion.COMPUTERVISION_COMPONENT_VERSION,
         category = ComponentCategory.EXPERIMENTAL, nonVisible = false,
         description = "Component for classifying images.")
 @SimpleObject
-@UsesAssets(fileNames = "deeplearnjs.html, deeplearn.js, deeplearn-main.js, deeplearn-squeeze.js")
+@UsesAssets(fileNames = "index.html, tfjs-0.6.1.js, imagenet_classes.js, computervision.js")
 @UsesPermissions(permissionNames = "android.permission.INTERNET")
-public final class DeepLearnJS extends AndroidViewComponent implements Component {
-    private static final String LOG_TAG = DeepLearnJS.class.getSimpleName();
+public final class ComputerVision extends AndroidViewComponent implements Component {
+    private static final String LOG_TAG = ComputerVision.class.getSimpleName();
 
     private final WebView webview;
     private final Form form;
@@ -51,14 +51,14 @@ public final class DeepLearnJS extends AndroidViewComponent implements Component
      *
      * @param form the container that this component will be placed in
      */
-    public DeepLearnJS(Form form) {
+    public ComputerVision(Form form) {
         super(form);
         webview = new WebView(form);
         this.form = form;
         webview.getSettings().setJavaScriptEnabled(true);
         webview.getSettings().setMediaPlaybackRequiresUserGesture(false);
         // adds a way to send strings to the javascript
-        webview.addJavascriptInterface(new JsObject(), "DeepLearnJS");
+        webview.addJavascriptInterface(new JsObject(), "ComputerVision");
         webview.setWebViewClient(new WebViewClient());
         webview.setWebChromeClient(new WebChromeClient() {
           @Override
@@ -70,15 +70,15 @@ public final class DeepLearnJS extends AndroidViewComponent implements Component
               }
             }
             //super.onPermissionRequest(request);
-            Log.d("DeepLearnJS", "onPermissionRequest called");
+            Log.d("ComputerVision", "onPermissionRequest called");
           }
         });
         //webview.loadUrl("https://kelseyc18.github.io/appinventor-computervision/");
         //webview.loadUrl("https://kelseyc18.github.io/appinventor-computervision/image/");
         //webview.loadUrl("https://kevin-vr.github.io/teachable-machine/");
         //webview.loadUrl("file:///android_assets/deeplearnjs.html");
-        webview.loadUrl("file:///android_asset/component/deeplearnjs.html");
-        Log.d(LOG_TAG, "Created DeepLearnJS component");
+        webview.loadUrl("file:///android_asset/component/computervision.html");
+        Log.d(LOG_TAG, "Created ComputerVision component");
         form.$add(this);
     }
 
@@ -110,10 +110,10 @@ public final class DeepLearnJS extends AndroidViewComponent implements Component
 
         String imageEncodedbase64String = Base64.encodeToString(b, 0).replace("\n", "");
         Log.d(LOG_TAG, "imageEncodedbase64String: " + imageEncodedbase64String);
-        Log.d(LOG_TAG, "javascript: " + "try { classifyImageData(\"" + "placeholder" + "\"); } catch(e) { DeepLearnJS.reportError(4, e.toString()); }");
+        Log.d(LOG_TAG, "javascript: " + "try { classifyImageData(\"" + "placeholder" + "\"); } catch(e) { ComputerVision.reportError(4, e.toString()); }");
 
         webview.evaluateJavascript("try { console.log(\"DeepLearnJs: Before infer\"); classifyImageData(\"" + imageEncodedbase64String +
-                "\"); console.log(\"DeepLearnJs: After infer\"); } catch(e) { DeepLearnJS.reportError(4, e.toString()); }", new ValueCallback<String>() {
+                "\"); console.log(\"DeepLearnJs: After infer\"); } catch(e) { ComputerVision.reportError(4, e.toString()); }", new ValueCallback<String>() {
             @Override
             public void onReceiveValue(String s) {
                 Log.d(LOG_TAG, "Test result = " + s);
