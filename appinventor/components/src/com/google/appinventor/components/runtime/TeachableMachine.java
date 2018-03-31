@@ -34,7 +34,7 @@ import java.util.List;
         category = ComponentCategory.EXPERIMENTAL, nonVisible = false,
         description = "Component for classifying images.")
 @SimpleObject
-@UsesAssets(fileNames = "deeplearnjs.html, deeplearn.js, deeplearn-main.js, deeplearn-squeeze.js")
+@UsesAssets(fileNames = "computervision.html")
 @UsesPermissions(permissionNames = "android.permission.INTERNET")
 public final class TeachableMachine extends AndroidViewComponent implements Component {
     private static final String LOG_TAG = TeachableMachine.class.getSimpleName();
@@ -54,7 +54,7 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
         webview.getSettings().setJavaScriptEnabled(true);
         webview.getSettings().setMediaPlaybackRequiresUserGesture(false);
         // adds a way to send strings to the javascript
-        webview.addJavascriptInterface(new JsObject(), "DeepLearnJS");
+        webview.addJavascriptInterface(new JsObject(), "TeachableMachine");
         webview.setWebViewClient(new WebViewClient());
         webview.setWebChromeClient(new WebChromeClient() {
           @Override
@@ -66,7 +66,7 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
               }
             }
             //super.onPermissionRequest(request);
-            Log.d("DeepLearnJS", "onPermissionRequest called");
+            Log.d(LOG_TAG, "onPermissionRequest called");
           }
         });
         //webview.loadUrl("https://kelseyc18.github.io/appinventor-computervision/");
@@ -74,7 +74,7 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
         webview.loadUrl("https://kevin-vr.github.io/teachable-machine/");
         //webview.loadUrl("file:///android_assets/deeplearnjs.html");
 //        webview.loadUrl("file:///android_asset/component/deeplearnjs.html");
-        Log.d(LOG_TAG, "Created DeepLearnJS component");
+        Log.d(LOG_TAG, "Created TeachableMachine component");
         form.$add(this);
     }
 
@@ -106,15 +106,7 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
 
         String imageEncodedbase64String = Base64.encodeToString(b, 0).replace("\n", "");
         Log.d(LOG_TAG, "imageEncodedbase64String: " + imageEncodedbase64String);
-        Log.d(LOG_TAG, "javascript: " + "try { classifyImageData(\"" + "placeholder" + "\"); } catch(e) { DeepLearnJS.reportError(4, e.toString()); }");
 
-        webview.evaluateJavascript("try { console.log(\"DeepLearnJs: Before infer\"); classifyImageData(\"" + imageEncodedbase64String +
-                "\"); console.log(\"DeepLearnJs: After infer\"); } catch(e) { DeepLearnJS.reportError(4, e.toString()); }", new ValueCallback<String>() {
-            @Override
-            public void onReceiveValue(String s) {
-                Log.d(LOG_TAG, "Test result = " + s);
-            }
-        });
     }
 
     @SimpleFunction

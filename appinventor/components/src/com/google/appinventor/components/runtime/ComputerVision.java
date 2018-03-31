@@ -38,7 +38,7 @@ import java.util.List;
         category = ComponentCategory.EXPERIMENTAL, nonVisible = false,
         description = "Component for classifying images.")
 @SimpleObject
-@UsesAssets(fileNames = "index.html, tfjs-0.6.1.js, imagenet_classes.js, computervision.js")
+@UsesAssets(fileNames = "computervision.html, tfjs-0.6.1.js, imagenet_classes.js, computervision.js")
 @UsesPermissions(permissionNames = "android.permission.INTERNET")
 public final class ComputerVision extends AndroidViewComponent implements Component {
     private static final String LOG_TAG = ComputerVision.class.getSimpleName();
@@ -112,8 +112,8 @@ public final class ComputerVision extends AndroidViewComponent implements Compon
         Log.d(LOG_TAG, "imageEncodedbase64String: " + imageEncodedbase64String);
         Log.d(LOG_TAG, "javascript: " + "try { classifyImageData(\"" + "placeholder" + "\"); } catch(e) { ComputerVision.reportError(4, e.toString()); }");
 
-        webview.evaluateJavascript("try { console.log(\"DeepLearnJs: Before infer\"); classifyImageData(\"" + imageEncodedbase64String +
-                "\"); console.log(\"DeepLearnJs: After infer\"); } catch(e) { ComputerVision.reportError(4, e.toString()); }", new ValueCallback<String>() {
+        webview.evaluateJavascript("try { classifyImageData(\"" + imageEncodedbase64String +
+                "\"); } catch(e) { ComputerVision.reportError(4, e.toString()); }", new ValueCallback<String>() {
             @Override
             public void onReceiveValue(String s) {
                 Log.d(LOG_TAG, "Test result = " + s);
