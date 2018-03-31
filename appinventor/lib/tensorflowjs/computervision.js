@@ -11,7 +11,7 @@ let mobilenet;
 const mobilenetDemo = async () => {
   mobilenet = await tf.loadModel(MOBILENET_MODEL_PATH);
   mobilenet.predict(tf.zeros([1, IMAGE_SIZE, IMAGE_SIZE, 3])).dispose();
-  console.log("ComputerVision: Mobilenet ready");
+  console.log('ComputerVision: Mobilenet ready');
   ComputerVision.ready();
 };
 
@@ -64,7 +64,6 @@ video.width = 500;
 video.style.display = 'none';
 
 var frontFacing = true;
-var videoConstraints = {video: {facingMode: frontFacing ? 'user' : 'environment'}, audio: false};
 var isPlaying = false;
 var isVideoMode = false;
 

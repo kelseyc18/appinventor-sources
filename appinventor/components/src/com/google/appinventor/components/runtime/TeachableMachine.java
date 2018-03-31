@@ -81,6 +81,7 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
     /**
      * Classifies the image at the given path.
      */
+    /*
     @SimpleFunction
     public void Classify(final String image) {
         Log.d(LOG_TAG, "Entered Classify");
@@ -111,44 +112,44 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
 
     @SimpleFunction
     public void StartVideo() {
-      webview.evaluateJavascript("start();", null);
+      webview.evaluateJavascript("startVideo();", null);
     }
 
     @SimpleFunction
     public void StopVideo() {
-      webview.evaluateJavascript("stop();", null);
+      webview.evaluateJavascript("stopVideo();", null);
     }
+    */
 
     @SimpleFunction
     public void ToggleCameraFacingMode() {
       webview.evaluateJavascript("toggleCameraFacingMode();", null);
     }
 
+    /*
     @SimpleFunction
     public void ClassifyVideoData() {
-      webview.evaluateJavascript("classifyVideoData();", null);
     }
 
     @SimpleFunction
     public void ShowImage() {
-      webview.evaluateJavascript("showImage();", null);
     }
 
     @SimpleFunction
     public void HideImage() {
-      webview.evaluateJavascript("hideImage();", null);
     }
 
     @SimpleFunction
     public void SetInputMode(final String inputMode) {
-      webview.evaluateJavascript("setInputMode(\"" + inputMode + "\");", null);
     }
+    */
 
     @SimpleFunction
     public void SetInputWidth(final int width) {
       webview.evaluateJavascript("setInputWidth(" + width + ");", null);
     }
 
+    /*
     @SimpleFunction
     public void Train(final YailList data) {
 
@@ -173,48 +174,76 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
     public void Load(final String file) {
 
     }
+    */
 
     @SimpleFunction
     public void StartTraining(final String label) {
-
+        webview.evaluateJavascript("startTraining(\"" + label + "\");", null);
     }
 
     @SimpleFunction
     public void StopTraining() {
-
+        webview.evaluateJavascript("stopTraining();", null);
     }
 
-    /*
     @SimpleFunction
     public int GetSampleCount(final String label) {
         return 0;
+        /*
+        webview.evaluateJavascript("getSampleCount(\"" + label + "\");", new ValueCallback<String>() {
+            @Override
+            public void onRecieveValue(int s) {
+                return s;
+            }
+        });
+        */
     }
 
     @SimpleFunction
     public float GetConfidence(final String label) {
         return 0;
+        /*
+        webview.evaluateJavascript("getConfidence(\"" + label + "\");", new ValueCallback<String>() {
+            @Override
+            public void onRecieveValue(float s) {
+                return s;
+            }
+        });
+        */
     }
-    */
 
     @SimpleEvent
     public void ClassifierReady() {
         EventDispatcher.dispatchEvent(this, "ClassifierReady");
     }
-
+    /*
     @SimpleEvent
     public void AfterTraining(int responseCode, String message) {
         EventDispatcher.dispatchEvent(this, "AfterTraining", responseCode, message);
     }
+    */
 
     @SimpleEvent
-    public void GotClassification(YailList result) {
+    public void GotSampleCounts(YailList result) {
+        EventDispatcher.dispatchEvent(this, "GotSampleCounts", result);
+    }
+
+    @SimpleEvent
+    public void GotConfidences(YailList result) {
+        EventDispatcher.dispatchEvent(this, "GotConfidences", result);
+    }
+
+    @SimpleEvent
+    public void GotClassification(String result) {
         EventDispatcher.dispatchEvent(this, "GotClassification", result);
     }
 
+    /*
     @SimpleEvent
     public void ClassificationFailed(int errorCode, String message) {
         EventDispatcher.dispatchEvent(this, "ClassificationFailed", errorCode, message);
     }
+    */
 
     @Override
     public View getView() {
@@ -234,36 +263,44 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
         }
 
         @JavascriptInterface
-        public void reportResult(final String result) {
-            Log.d(LOG_TAG, "Entered reportResult: " + result);
-            try {
-                Log.d(LOG_TAG, "Entered try of reportResult");
-                JSONArray list = new JSONArray(result);
-                YailList intermediateList = YailList.makeList(JsonUtil.getListFromJsonArray(list));
-                final List resultList = new ArrayList();
-                for (int i = 0; i < intermediateList.size(); i++) {
-                    resultList.add(YailList.makeList((List) intermediateList.getObject(i)));
-                }
-                form.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        GotClassification(YailList.makeList(resultList));
-                    }
-                });
-            } catch (JSONException e) {
-                Log.d(LOG_TAG, "Entered catch of reportResult");
-                e.printStackTrace();
-                reportError(1, e.getMessage());
-            }
-        }
-
-        @JavascriptInterface
-        public void reportError(final int code, final String message) {
-            Log.d(LOG_TAG, "Entered reportError: " + message);
+        public void gotSampleCounts(final String result) {
+            Log.d(LOG_TAG, "Entered gotSampleCounts: " + result);
             form.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    ClassificationFailed(code, message);
+                    try {
+                        JSONArray list = new JSONArray(result);
+                        GotSampleCounts(YailList.makeList(JsonUtil.getListFromJsonArray(list)));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void gotConfidences(final String result) {
+            Log.d(LOG_TAG, "Entered gotConfidences: " + result);
+            form.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        JSONArray list = new JSONArray(result);
+                        GotConfidences(YailList.makeList(JsonUtil.getListFromJsonArray(list)));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void gotClassification(final String result) {
+            Log.d(LOG_TAG, "Entered gotClassification: " + result);
+            form.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    GotClassification(result);
                 }
             });
         }

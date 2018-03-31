@@ -70,7 +70,7 @@ public final class ComputerVision extends AndroidViewComponent implements Compon
               }
             }
             //super.onPermissionRequest(request);
-            Log.d("ComputerVision", "onPermissionRequest called");
+            Log.d(LOG_TAG, "onPermissionRequest called");
           }
         });
         //webview.loadUrl("https://kelseyc18.github.io/appinventor-computervision/");

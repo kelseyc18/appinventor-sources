@@ -4769,6 +4769,14 @@ public interface OdeMessages extends Messages {
   @Description("")
   String SensorValueChangedEvents();
 
+  @DefaultMessage("GotSampleCounts")
+  @Description("")
+  String GotSampleCountsEvents();
+
+  @DefaultMessage("GotConfidences")
+  @Description("")
+  String GotConfidencesEvents();
+
   @DefaultMessage("GotClassification")
   @Description("")
   String GotClassificationEvents();
@@ -7107,4 +7115,16 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("StopTraining")
   @Description("")
   String StopTrainingMethods();
+
+  @DefaultMessage("GetSampleCount")
+  @Description("")
+  String GetSampleCountMethods();
+
+  @DefaultMessage("GetConfidence")
+  @Description("")
+  String GetConfidenceMethods();
+
+  @DefaultMessage("GetClassification")
+  @Description("")
+  String GetClassificationMethods();
 }
