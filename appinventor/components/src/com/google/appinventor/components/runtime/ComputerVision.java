@@ -6,6 +6,7 @@
 
 package com.google.appinventor.components.runtime;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.Base64;
@@ -26,6 +27,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,13 +40,14 @@ import java.util.List;
         category = ComponentCategory.EXPERIMENTAL, nonVisible = false,
         description = "Component for classifying images.")
 @SimpleObject
-@UsesAssets(fileNames = "computervision.html, tfjs-0.6.1.js, imagenet_classes.js, computervision.js")
+@UsesAssets(fileNames = "computervision.html, computervision.js, group1-shard1of1, group10-shard1of1, group11-shard1of1, group12-shard1of1, group13-shard1of1, group14-shard1of1, group15-shard1of1, group16-shard1of1, group17-shard1of1, group18-shard1of1, group19-shard1of1, group2-shard1of1, group20-shard1of1, group21-shard1of1, group22-shard1of1, group23-shard1of1, group24-shard1of1, group25-shard1of1, group26-shard1of1, group27-shard1of1, group28-shard1of1, group29-shard1of1, group3-shard1of1, group30-shard1of1, group31-shard1of1, group32-shard1of1, group33-shard1of1, group34-shard1of1, group35-shard1of1, group36-shard1of1, group37-shard1of1, group38-shard1of1, group39-shard1of1, group4-shard1of1, group40-shard1of1, group41-shard1of1, group42-shard1of1, group43-shard1of1, group44-shard1of1, group45-shard1of1, group46-shard1of1, group47-shard1of1, group48-shard1of1, group49-shard1of1, group5-shard1of1, group50-shard1of1, group51-shard1of1, group52-shard1of1, group53-shard1of1, group54-shard1of1, group55-shard1of1, group6-shard1of1, group7-shard1of1, group8-shard1of1, group9-shard1of1, imagenet_classes.js, model.json, tfjs-0.6.1.js")
 @UsesPermissions(permissionNames = "android.permission.INTERNET")
 public final class ComputerVision extends AndroidViewComponent implements Component {
     private static final String LOG_TAG = ComputerVision.class.getSimpleName();
 
     private final WebView webview;
     private final Form form;
+    private static TensorflowJSHTTPD httpdServer = null;
 
     /**
      * Creates a new WebViewer component.
@@ -53,10 +56,13 @@ public final class ComputerVision extends AndroidViewComponent implements Compon
      */
     public ComputerVision(Form form) {
         super(form);
-        webview = new WebView(form);
         this.form = form;
+        startHTTPD();
+        Log.d(LOG_TAG, form.$context().getFilesDir().getAbsolutePath());
+        webview = new WebView(form);
         webview.getSettings().setJavaScriptEnabled(true);
         webview.getSettings().setMediaPlaybackRequiresUserGesture(false);
+        //webview.getSettings().setAllowUniversalAccessFromFileURLs(true);
         // adds a way to send strings to the javascript
         webview.addJavascriptInterface(new JsObject(), "ComputerVision");
         webview.setWebViewClient(new WebViewClient());
@@ -74,12 +80,22 @@ public final class ComputerVision extends AndroidViewComponent implements Compon
           }
         });
         //webview.loadUrl("https://kelseyc18.github.io/appinventor-computervision/");
-        //webview.loadUrl("https://kelseyc18.github.io/appinventor-computervision/image/");
-        //webview.loadUrl("https://kevin-vr.github.io/teachable-machine/");
-        //webview.loadUrl("file:///android_assets/deeplearnjs.html");
-        webview.loadUrl("file:///android_asset/component/computervision.html");
+        //webview.loadUrl("file:///android_asset/component/computervision.html");
+        webview.loadUrl("http://localhost:8016/computervision.html");
         Log.d(LOG_TAG, "Created ComputerVision component");
         form.$add(this);
+    }
+
+    public void startHTTPD() {
+        try {
+            if (httpdServer == null) {
+                httpdServer = new TensorflowJSHTTPD(8016, new File("/sdcard/AppInventor/assets/"), form.$context());
+                Log.d(LOG_TAG, "startHTTPD");
+            }
+        } catch (IOException e) {
+            Log.d(LOG_TAG, "startHTTPD not working: ");
+            e.printStackTrace();
+        }
     }
 
     /**
