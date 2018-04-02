@@ -24,13 +24,13 @@ public class TensorflowJSHTTPD extends NanoHTTPD {
 
   private File rootDir;
   private Context context;
-  private List<String> component_list;
+  private List<String> componentList;
 
   public TensorflowJSHTTPD(int port, File wwwroot, Context context) throws IOException {
     super(port, wwwroot);
     this.rootDir = wwwroot;
     this.context = context;
-    this.component_list = Arrays.asList(context.getAssets().list("component"));
+    this.componentList = Arrays.asList(context.getAssets().list("component"));
     Log.d("TensorflowJSHTTPD", Arrays.toString(context.getAssets().list("component")));
   }
 
@@ -38,7 +38,7 @@ public class TensorflowJSHTTPD extends NanoHTTPD {
     try {
       String mimeType;
       InputStream inputStream;
-      if (component_list.contains(uri.substring(1))) {
+      if (componentList.contains(uri.substring(1))) {
         if (uri.endsWith(".html")) {
           mimeType = "text/html";
         } else if (uri.endsWith(".js")) {
