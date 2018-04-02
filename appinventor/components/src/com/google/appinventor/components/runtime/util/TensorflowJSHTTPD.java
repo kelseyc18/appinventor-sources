@@ -36,7 +36,7 @@ public class TensorflowJSHTTPD extends NanoHTTPD {
 
   public Response serve(String uri, String method, Properties header, Properties params, Properties files, Socket mySocket) {
     try {
-      String mimeType = "";
+      String mimeType;
       InputStream inputStream;
       if (component_list.contains(uri.substring(1))) {
         if (uri.endsWith(".html")) {
