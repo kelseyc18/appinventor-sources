@@ -414,7 +414,6 @@ function clear(label) {
     } else {
       TeachableMachine.gotClassification("");
     }
-
   }
 }
 
