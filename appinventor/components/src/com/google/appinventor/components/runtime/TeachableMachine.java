@@ -201,6 +201,11 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
     }
 
     @SimpleFunction
+    public void Clear(final String label) {
+        webview.evaluateJavascript("clear(\"" + label + "\");", null);
+    }
+
+    @SimpleFunction
     public int GetSampleCount(final String label) {
         return 0;
         /*
@@ -238,18 +243,18 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
     */
 
     @SimpleEvent
-    public void GotSampleCounts(YailList result) {
-        EventDispatcher.dispatchEvent(this, "GotSampleCounts", result);
+    public void GotSampleCounts(YailList labels, YailList sampleCounts) {
+        EventDispatcher.dispatchEvent(this, "GotSampleCounts", labels, sampleCounts);
     }
 
     @SimpleEvent
-    public void GotConfidences(YailList result) {
-        EventDispatcher.dispatchEvent(this, "GotConfidences", result);
+    public void GotConfidences(YailList labels, YailList confidences) {
+        EventDispatcher.dispatchEvent(this, "GotConfidences", labels, confidences);
     }
 
     @SimpleEvent
-    public void GotClassification(String result) {
-        EventDispatcher.dispatchEvent(this, "GotClassification", result);
+    public void GotClassification(String label) {
+        EventDispatcher.dispatchEvent(this, "GotClassification", label);
     }
 
     /*
@@ -277,14 +282,15 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
         }
 
         @JavascriptInterface
-        public void gotSampleCounts(final String result) {
-            Log.d(LOG_TAG, "Entered gotSampleCounts: " + result);
+        public void gotSampleCounts(final String labels, final String sampleCounts) {
+            Log.d(LOG_TAG, "Entered gotSampleCounts: " + labels + " " + sampleCounts);
             form.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        JSONArray list = new JSONArray(result);
-                        GotSampleCounts(YailList.makeList(JsonUtil.getListFromJsonArray(list)));
+                        JSONArray list1 = new JSONArray(labels);
+                        JSONArray list2 = new JSONArray(sampleCounts);
+                        GotSampleCounts(YailList.makeList(JsonUtil.getListFromJsonArray(list1)), YailList.makeList(JsonUtil.getListFromJsonArray(list2)));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -293,14 +299,15 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
         }
 
         @JavascriptInterface
-        public void gotConfidences(final String result) {
-            Log.d(LOG_TAG, "Entered gotConfidences: " + result);
+        public void gotConfidences(final String labels, final String confidences) {
+            Log.d(LOG_TAG, "Entered gotConfidences: " + labels + " " + confidences);
             form.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        JSONArray list = new JSONArray(result);
-                        GotConfidences(YailList.makeList(JsonUtil.getListFromJsonArray(list)));
+                        JSONArray list1 = new JSONArray(labels);
+                        JSONArray list2 = new JSONArray(confidences);
+                        GotConfidences(YailList.makeList(JsonUtil.getListFromJsonArray(list1)), YailList.makeList(JsonUtil.getListFromJsonArray(list2)));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -309,12 +316,12 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
         }
 
         @JavascriptInterface
-        public void gotClassification(final String result) {
-            Log.d(LOG_TAG, "Entered gotClassification: " + result);
+        public void gotClassification(final String label) {
+            Log.d(LOG_TAG, "Entered gotClassification: " + label);
             form.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    GotClassification(result);
+                    GotClassification(label);
                 }
             });
         }

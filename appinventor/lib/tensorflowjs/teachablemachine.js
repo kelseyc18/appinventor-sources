@@ -244,11 +244,17 @@ document.body.appendChild(video);
 var timer;
 
 var labelToClass = {};
-var labels = [];
+var classToLabel = {};
 
 var confidences = {};
 
 var topChoice;
+
+var availableClasses = [];
+
+for (let i = 0; i < NUM_CLASSES; i++) {
+  availableClasses.push(i);
+}
 
 video.addEventListener('loadedmetadata', function () {
   video.height = this.videoHeight * video.width / this.videoWidth;
@@ -296,12 +302,38 @@ function stop() {
   cancelAnimationFrame(timer);
 }
 
+function listSampleCounts() {
+  var sampleCounts = knn.getClassExampleCount();
+  var sList = [[], []];
+  for (let i = 0; i < NUM_CLASSES; i++) {
+    if (classToLabel.hasOwnProperty(i)) {
+      sList[0].push(classToLabel[i]);
+      sList[1].push(sampleCounts[i]);
+    }
+  }
+  return sList;
+}
+
+function listConfidences() {
+  var cList = [[], []];
+  for (let i = 0; i < NUM_CLASSES; i++) {
+    if (classToLabel.hasOwnProperty(i)) {
+      cList[0].push(classToLabel[i]);
+      cList[1].push(confidences[i]);
+    }
+  }
+  return cList;
+}
+
 function animate() {
   if(videoPlaying) {
-    const image = tf.image.resizeBilinear(tf.fromPixels(video).toFloat(), [IMAGE_SIZE, IMAGE_SIZE]);
+    const image = tf.tidy(() => {
+      return tf.image.resizeBilinear(tf.fromPixels(video).toFloat(), [IMAGE_SIZE, IMAGE_SIZE]);
+    });
     if(training != -1) {
       knn.addImage(image, training);
-      TeachableMachine.gotSampleCounts(JSON.stringify(knn.getClassExampleCount()));
+      var sList = listSampleCounts();
+      TeachableMachine.gotSampleCounts(JSON.stringify(sList[0]), JSON.stringify(sList[1]));
     }
     const exampleCount = knn.getClassExampleCount();
     if(Math.max(...exampleCount) > 0) {
@@ -315,8 +347,9 @@ function animate() {
             confidences[i] = res.confidences[i];
           }
         }
-        TeachableMachine.gotConfidences(JSON.stringify(Object.values(confidences)));
-        TeachableMachine.gotClassification(labels[topChoice]);
+        var cList = listConfidences();
+        TeachableMachine.gotConfidences(JSON.stringify(cList[0]), JSON.stringify(cList[1]));
+        TeachableMachine.gotClassification(classToLabel[topChoice]);
       })
       .then(() => image.dispose());
     } else {
@@ -327,13 +360,13 @@ function animate() {
 }
 
 function startTraining(label) {
-  var numClasses = Object.keys(labelToClass).length;
   if (!labelToClass.hasOwnProperty(label)) {
-    if (numClasses == NUM_CLASSES) {
+    if (availableClasses.length == 0) {
       return;
     }
-    labelToClass[label] = numClasses;
-    labels.push(label);
+    var c = availableClasses.shift();
+    labelToClass[label] = c;
+    classToLabel[c] = label;
   }
   training = labelToClass[label];
 }
@@ -358,7 +391,31 @@ function getConfidence(label) {
 }
 
 function getClassification() {
-  return labels[topChoice];
+  return classToLabel[topChoice];
+}
+
+function clear(label) {
+  if (labelToClass.hasOwnProperty(label)) {
+    if (training === labelToClass[label]) {
+      stopTraining();
+    }
+    knn.clearClass(labelToClass[label]);
+    availableClasses.push(labelToClass[label]);
+    availableClasses.sort();
+    delete classToLabel[labelToClass[label]];
+    delete confidences[labelToClass[label]];
+    delete labelToClass[label];
+    var sList = listSampleCounts();
+    TeachableMachine.gotSampleCounts(JSON.stringify(sList[0]), JSON.stringify(sList[1]));
+    var cList = listConfidences();
+    TeachableMachine.gotConfidences(JSON.stringify(cList[0]), JSON.stringify(cList[1]));
+    if (classToLabel.hasOwnProperty(topChoice)) {
+      TeachableMachine.gotClassification(classToLabel[topChoice]);
+    } else {
+      TeachableMachine.gotClassification("");
+    }
+
+  }
 }
 
 function setInputWidth(width) {

@@ -7092,6 +7092,18 @@ public interface OdeMessages extends Messages {
   @Description("")
   String inputModeParams();
 
+  @DefaultMessage("labels")
+  @Description("")
+  String labelsParams();
+
+  @DefaultMessage("confidences")
+  @Description("")
+  String confidencesParams();
+
+  @DefaultMessage("sampleCounts")
+  @Description("")
+  String sampleCountsParams();
+
   @DefaultMessage("SetInputWidth")
   @Description("")
   String SetInputWidthMethods();
