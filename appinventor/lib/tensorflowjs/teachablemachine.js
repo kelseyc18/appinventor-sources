@@ -412,7 +412,7 @@ function clear(label) {
     if (classToLabel.hasOwnProperty(topChoice)) {
       TeachableMachine.gotClassification(classToLabel[topChoice]);
     } else {
-      TeachableMachine.gotClassification("");
+      TeachableMachine.gotClassification('');
     }
   }
 }
