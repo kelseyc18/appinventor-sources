@@ -25,7 +25,9 @@ class KNNImageClassifier {
 
   async load() {
     this.mobilenet = await tf.loadModel(MOBILENET_MODEL_PATH);
-    this.mobilenet.predict(tf.zeros([1, IMAGE_SIZE, IMAGE_SIZE, 3])).dispose();
+    const zeros = tf.zeros([1, IMAGE_SIZE, IMAGE_SIZE, 3]);
+    this.mobilenet.predict(zeros).dispose();
+    zeros.dispose();
     this.varsLoaded = true;
     console.log('TeachableMachine: KNNImageClassifier ready');
   }
@@ -35,6 +37,7 @@ class KNNImageClassifier {
       console.log(`Cannot clear invalid class ${classIndex}`);
       return;
     }
+    this.classLogitsMatrices[classIndex].dispose();
     this.classLogitsMatrices[classIndex] = null;
     this.classExampleCount[classIndex] = 0;
     this._clearTrainLogitsMatrix();
@@ -112,7 +115,9 @@ class KNNImageClassifier {
     if (!this.varsLoaded) {
       throw new Error('Cannot predict until vars have been loaded.');
     }
-    const knn = this.predict(image).asType('float32');
+    const knn = tf.tidy(() => {
+      return this.predict(image).asType('float32');
+    });
     const numExamples = this._getNumExamples();
     const kVal = Math.min(this.k, numExamples);
     const topK = this._topK(await knn.data(), kVal);
