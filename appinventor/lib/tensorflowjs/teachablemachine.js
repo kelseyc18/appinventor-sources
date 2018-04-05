@@ -5,9 +5,15 @@ console.log('TeachableMachine: Using Tensorflow.js version ' + tf.version.tfjs);
 //const MOBILENET_MODEL_PATH = 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json';
 const MOBILENET_MODEL_PATH = 'model.json';
 
-const NUM_CLASSES = 3;
+var NUM_CLASSES = 3;
 const IMAGE_SIZE = 224;
 const TOPK = 10;
+
+var url = window.location.href;
+var index = url.indexOf("=");
+if (index >= 0) {
+  NUM_CLASSES = parseInt(url.substring(index+1), 10);
+}
 
 class KNNImageClassifier {
   constructor(numClasses, k) {

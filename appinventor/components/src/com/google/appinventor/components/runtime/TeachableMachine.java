@@ -15,6 +15,7 @@ import android.webkit.*;
 import com.google.appinventor.components.annotations.*;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.YaVersion;
+import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.runtime.util.JsonUtil;
 import com.google.appinventor.components.runtime.util.MediaUtil;
 import com.google.appinventor.components.runtime.util.YailList;
@@ -134,6 +135,18 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
       webview.evaluateJavascript("stopVideo();", null);
     }
     */
+
+    @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_NON_NEGATIVE_INTEGER,
+        defaultValue = "3")
+    @SimpleProperty(userVisible = false, description = "No description")
+    public void NumberOfLabels(int num) {
+      Log.d(LOG_TAG, "NumberOfLabels is " + String.valueOf(num));
+      if (num == 3) {
+        webview.loadUrl("http://localhost:8017/teachablemachine.html");
+      } else {
+        webview.loadUrl("http://localhost:8017/teachablemachine.html?n=" + String.valueOf(num));
+      }
+    }
 
     @SimpleFunction
     public void ToggleCameraFacingMode() {

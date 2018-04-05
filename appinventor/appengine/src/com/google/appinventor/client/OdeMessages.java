@@ -7107,4 +7107,9 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("StopTraining")
   @Description("")
   String StopTrainingMethods();
+
+  @DefaultMessage("NumberOfLabels")
+  @Description("")
+  String NumberOfLabelsProperties();
+
 }
