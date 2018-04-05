@@ -1,6 +1,6 @@
 'use strict';
 
-console.log('ComputerVision: Using Tensorflow.js version ' + tf.version.tfjs);
+console.log('Look: Using Tensorflow.js version ' + tf.version.tfjs);
 
 //const MOBILENET_MODEL_PATH = 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json';
 const MOBILENET_MODEL_PATH = 'model.json';
@@ -12,8 +12,8 @@ let mobilenet;
 const mobilenetDemo = async () => {
   mobilenet = await tf.loadModel(MOBILENET_MODEL_PATH);
   mobilenet.predict(tf.zeros([1, IMAGE_SIZE, IMAGE_SIZE, 3])).dispose();
-  console.log('ComputerVision: Mobilenet ready');
-  ComputerVision.ready();
+  console.log('Look: Mobilenet ready');
+  Look.ready();
 };
 
 async function predict(imgElement) {
@@ -29,8 +29,8 @@ async function predict(imgElement) {
   for (let i = 0; i < classes.length; i++) {
     result.push([classes[i].className, classes[i].probability.toFixed(5)]);
   }
-  console.log('ComputerVision: prediction is ' + JSON.stringify(result));
-  ComputerVision.reportResult(JSON.stringify(result));
+  console.log('Look: prediction is ' + JSON.stringify(result));
+  Look.reportResult(JSON.stringify(result));
 }
 
 async function getTopKClasses(logits, topK) {
@@ -53,7 +53,7 @@ async function getTopKClasses(logits, topK) {
     topClassesAndProbs.push({
       className: IMAGENET_CLASSES[topkIndices[i]],
       probability: topkValues[i]
-    })
+    });
   }
   return topClassesAndProbs;
 }
@@ -81,7 +81,7 @@ video.addEventListener('loadedmetadata', function () {
     video.height = this.videoHeight * video.width / this.videoWidth;
 }, false);
 
-function start() {
+function startVideo() {
   if (!isPlaying && isVideoMode) {
     navigator.mediaDevices.getUserMedia({video: {facingMode: frontFacing ? 'user' : 'environment'}, audio: false})
     .then(stream => (video.srcObject = stream))
@@ -91,7 +91,7 @@ function start() {
   }
 }
 
-function stop() {
+function stopVideo() {
   if (isPlaying && isVideoMode && video.srcObject) {
     video.srcObject.getTracks().forEach(t => t.stop());
     isPlaying = false;
@@ -101,8 +101,8 @@ function stop() {
 
 function toggleCameraFacingMode() {
   frontFacing = !frontFacing;
-  stop();
-  start();
+  stopVideo();
+  startVideo();
 }
 
 function classifyVideoData() {
@@ -136,13 +136,13 @@ function hideImage() {
 
 function setInputMode(inputMode) {
   if (inputMode == 'image' && isVideoMode) {
-    stop();
+    stopVideo();
     isVideoMode = false;
     showImage();
   } else if (inputMode == 'video' && !isVideoMode) {
     hideImage();
     isVideoMode = true;
-    start();
+    startVideo();
   }
 }
 

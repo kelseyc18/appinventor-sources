@@ -205,32 +205,6 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
         webview.evaluateJavascript("clear(\"" + label + "\");", null);
     }
 
-    @SimpleFunction
-    public int GetSampleCount(final String label) {
-        return 0;
-        /*
-        webview.evaluateJavascript("getSampleCount(\"" + label + "\");", new ValueCallback<String>() {
-            @Override
-            public void onRecieveValue(int s) {
-                return s;
-            }
-        });
-        */
-    }
-
-    @SimpleFunction
-    public float GetConfidence(final String label) {
-        return 0;
-        /*
-        webview.evaluateJavascript("getConfidence(\"" + label + "\");", new ValueCallback<String>() {
-            @Override
-            public void onRecieveValue(float s) {
-                return s;
-            }
-        });
-        */
-    }
-
     @SimpleEvent
     public void ClassifierReady() {
         EventDispatcher.dispatchEvent(this, "ClassifierReady");

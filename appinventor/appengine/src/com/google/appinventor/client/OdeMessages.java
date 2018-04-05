@@ -1111,7 +1111,7 @@ public interface OdeMessages extends Messages {
   String horizontalAlignmentChoiceLeft();
 
   @DefaultMessage("Right")
-  @Description("Text for horizontal alignemt choice 'Right'")
+  @Description("Text for horizontal alignment choice 'Right'")
   String horizontalAlignmentChoiceRight();
 
   @DefaultMessage("Center")
@@ -2422,9 +2422,9 @@ public interface OdeMessages extends Messages {
   @Description("")
   String cameraComponentPallette();
 
-  @DefaultMessage("ComputerVision")
+  @DefaultMessage("Look")
   @Description("")
-  String computerVisionComponentPallette();
+  String lookComponentPallette();
 
   @DefaultMessage("TeachableMachine")
   @Description("")
@@ -4785,10 +4785,6 @@ public interface OdeMessages extends Messages {
   @Description("")
   String ClassificationFailedEvents();
 
-  @DefaultMessage("AfterTraining")
-  @Description("")
-  String AfterTrainingEvents();
-
   //Methods
   @DefaultMessage("ResolveActivity")
   @Description("")
@@ -5873,7 +5869,7 @@ public interface OdeMessages extends Messages {
 
   @DefaultMessage("Component for classifying images.")
   @Description("")
-  String ComputerVisionHelpStringComponentPallette();
+  String LookHelpStringComponentPallette();
 
   @DefaultMessage("Component for training and classifying video.")
   @Description("")
@@ -6267,7 +6263,7 @@ public interface OdeMessages extends Messages {
 
   @DefaultMessage("<p>It appears that <b>" + "%1" +
       "</b> has had all blocks removed.</p><p>" +
-      "<ul><li>You can save the enpty screen, and then all those blocks will be " +
+      "<ul><li>You can save the empty screen, and then all those blocks will be " +
       "permanently gone from the project.</li>" +
       "<li>Alternatively, you can restore the previously saved version " +
       "of the project.</li></ul></p>")
@@ -6982,10 +6978,6 @@ public interface OdeMessages extends Messages {
   @Description("")
   String dataParams();
 
-  @DefaultMessage("sample")
-  @Description("")
-  String sampleParams();
-
   @DefaultMessage("label")
   @Description("")
   String labelParams();
@@ -7060,10 +7052,6 @@ public interface OdeMessages extends Messages {
   @Description("")
   String SetCenterMethods();
 
-  @DefaultMessage("Classify")
-  @Description("")
-  String ClassifyMethods();
-
   @DefaultMessage("StartVideo")
   @Description("")
   String StartVideoMethods();
@@ -7075,6 +7063,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("ToggleCameraFacingMode")
   @Description("")
   String ToggleCameraFacingModeMethods();
+
+  @DefaultMessage("ClassifyImageData")
+  @Description("")
+  String ClassifyImageDataMethods();
 
   @DefaultMessage("ClassifyVideoData")
   @Description("")
@@ -7108,18 +7100,6 @@ public interface OdeMessages extends Messages {
   @Description("")
   String SetInputWidthMethods();
 
-  @DefaultMessage("Train")
-  @Description("")
-  String TrainMethods();
-
-  @DefaultMessage("TrainSample")
-  @Description("")
-  String TrainSampleMethods();
-
-  @DefaultMessage("Load")
-  @Description("")
-  String LoadMethods();
-
   @DefaultMessage("StartTraining")
   @Description("")
   String StartTrainingMethods();
@@ -7127,16 +7107,4 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("StopTraining")
   @Description("")
   String StopTrainingMethods();
-
-  @DefaultMessage("GetSampleCount")
-  @Description("")
-  String GetSampleCountMethods();
-
-  @DefaultMessage("GetConfidence")
-  @Description("")
-  String GetConfidenceMethods();
-
-  @DefaultMessage("GetClassification")
-  @Description("")
-  String GetClassificationMethods();
 }
