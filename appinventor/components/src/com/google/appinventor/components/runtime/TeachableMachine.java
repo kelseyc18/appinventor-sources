@@ -244,12 +244,10 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
         EventDispatcher.dispatchEvent(this, "GotClassification", label);
     }
 
-    /*
     @SimpleEvent
-    public void ClassificationFailed(int errorCode, String message) {
-        EventDispatcher.dispatchEvent(this, "ClassificationFailed", errorCode, message);
+    public void Error(int errorCode, String message) {
+        EventDispatcher.dispatchEvent(this, "Error", errorCode, message);
     }
-    */
 
     @Override
     public View getView() {
@@ -309,6 +307,17 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
                 @Override
                 public void run() {
                     GotClassification(label);
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void error(final int errorCode, final String message) {
+            Log.d(LOG_TAG, "Entered error: errorCode = " + String.valueOf(errorCode) + " message = " + message);
+            form.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Error(errorCode, message);
                 }
             });
         }

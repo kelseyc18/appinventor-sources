@@ -2,12 +2,13 @@
 
 console.log('TeachableMachine: Using Tensorflow.js version ' + tf.version.tfjs);
 
-//const MOBILENET_MODEL_PATH = 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json';
+// const MOBILENET_MODEL_PATH = 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json';
 const MOBILENET_MODEL_PATH = 'model.json';
 
 var NUM_CLASSES = 3;
 const IMAGE_SIZE = 224;
 const TOPK = 10;
+const MAX_EXAMPLES = 50;
 
 var url = window.location.href;
 var index = url.indexOf("=");
@@ -341,7 +342,7 @@ function animate() {
     const image = tf.tidy(() => {
       return tf.image.resizeBilinear(tf.fromPixels(video).toFloat(), [IMAGE_SIZE, IMAGE_SIZE]);
     });
-    if(training != -1) {
+    if(training != -1 && knn.getClassExampleCount()[training] < MAX_EXAMPLES) {
       knn.addImage(image, training);
       var sList = listSampleCounts();
       TeachableMachine.gotSampleCounts(JSON.stringify(sList[0]), JSON.stringify(sList[1]));
