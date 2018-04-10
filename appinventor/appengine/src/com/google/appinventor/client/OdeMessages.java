@@ -4785,6 +4785,18 @@ public interface OdeMessages extends Messages {
   @Description("")
   String ClassificationFailedEvents();
 
+  @DefaultMessage("GotSavedModel")
+  @Description("")
+  String GotSavedModelEvents();
+
+  @DefaultMessage("DoneLoadingModel")
+  @Description("")
+  String DoneLoadingModelEvents();
+
+  @DefaultMessage("Error")
+  @Description("")
+  String ErrorEvents();
+
   //Methods
   @DefaultMessage("ResolveActivity")
   @Description("")
@@ -6982,6 +6994,10 @@ public interface OdeMessages extends Messages {
   @Description("")
   String labelParams();
 
+  @DefaultMessage("model")
+  @Description("")
+  String modelParams();
+
   @DefaultMessage("Rectangle")
   @Description("")
   String rectangleComponentPallette();
@@ -7108,8 +7124,15 @@ public interface OdeMessages extends Messages {
   @Description("")
   String StopTrainingMethods();
 
+  @DefaultMessage("SaveModel")
+  @Description("")
+  String SaveModelMethods();
+
+  @DefaultMessage("LoadModel")
+  @Description("")
+  String LoadModelMethods();
+
   @DefaultMessage("NumberOfLabels")
   @Description("")
   String NumberOfLabelsProperties();
-
 }

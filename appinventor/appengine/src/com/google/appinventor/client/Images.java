@@ -462,6 +462,18 @@ public interface Images extends Resources {
   ImageResource lookbig();
 
   /**
+   * Designer palette item: Teachable Machine component
+   */
+  @Source("com/google/appinventor/images/teachablemachine.png")
+  ImageResource teachablemachine();
+
+  /**
+   * Designer item: Teachable Machine component in designer
+   */
+  @Source("com/google/appinventor/images/teachablemachinebig.png")
+  ImageResource teachablemachinebig();
+
+  /**
    * Designer palette item: Web component
    */
   @Source("com/google/appinventor/images/web.png")
