@@ -23,9 +23,10 @@ import com.google.appinventor.components.runtime.util.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.io.ByteArrayOutputStream;
+import java.io.*;
 import java.io.File;
-import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +42,9 @@ import java.util.List;
 @UsesPermissions(permissionNames = "android.permission.INTERNET")
 public final class TeachableMachine extends AndroidViewComponent implements Component {
     private static final String LOG_TAG = TeachableMachine.class.getSimpleName();
+    private static final String MODEL_DIRECTORY = "/sdcard/AppInventor/assets/TeachableMachine";
+
+    private static final int ERROR_FILE_EXCEPTION = -3;
 
     private final WebView webview;
     private final Form form;
@@ -93,49 +97,6 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
         }
     }
 
-    /**
-     * Classifies the image at the given path.
-     */
-    /*
-    @SimpleFunction
-    public void Classify(final String image) {
-        Log.d(LOG_TAG, "Entered Classify");
-        Log.d(LOG_TAG, image);
-
-        String imagePath = (image == null) ? "" : image;
-        BitmapDrawable imageDrawable;
-        Bitmap scaledImageBitmap = null;
-
-        try {
-            imageDrawable = MediaUtil.getBitmapDrawable(form.$form(), imagePath);
-            //scaledImageBitmap = Bitmap.createScaledBitmap(imageDrawable.getBitmap(), 227, 227, false);
-            scaledImageBitmap = Bitmap.createScaledBitmap(imageDrawable.getBitmap(), 500, (int) (imageDrawable.getBitmap().getHeight() * 500.0 / imageDrawable.getBitmap().getWidth()), false);
-        } catch (IOException ioe) {
-            Log.e(LOG_TAG, "Unable to load " + imagePath);
-        }
-
-        // compression format of PNG -> not lossy
-        Bitmap immagex = scaledImageBitmap;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        immagex.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        byte[] b = baos.toByteArray();
-
-        String imageEncodedbase64String = Base64.encodeToString(b, 0).replace("\n", "");
-        Log.d(LOG_TAG, "imageEncodedbase64String: " + imageEncodedbase64String);
-
-    }
-
-    @SimpleFunction
-    public void StartVideo() {
-      webview.evaluateJavascript("startVideo();", null);
-    }
-
-    @SimpleFunction
-    public void StopVideo() {
-      webview.evaluateJavascript("stopVideo();", null);
-    }
-    */
-
     @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_NON_NEGATIVE_INTEGER,
         defaultValue = "3")
     @SimpleProperty(userVisible = false, description = "No description")
@@ -153,55 +114,10 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
       webview.evaluateJavascript("toggleCameraFacingMode();", null);
     }
 
-    /*
-    @SimpleFunction
-    public void ClassifyVideoData() {
-    }
-
-    @SimpleFunction
-    public void ShowImage() {
-    }
-
-    @SimpleFunction
-    public void HideImage() {
-    }
-
-    @SimpleFunction
-    public void SetInputMode(final String inputMode) {
-    }
-    */
-
     @SimpleFunction
     public void SetInputWidth(final int width) {
       webview.evaluateJavascript("setInputWidth(" + width + ");", null);
     }
-
-    /*
-    @SimpleFunction
-    public void Train(final YailList data) {
-
-    }
-
-    @SimpleFunction
-    public void TrainSample(final YailList sample) {
-
-    }
-
-    @SimpleFunction
-    public void Clear() {
-
-    }
-
-    @SimpleFunction
-    public void Save(final String file) {
-
-    }
-
-    @SimpleFunction
-    public void Load(final String file) {
-
-    }
-    */
 
     @SimpleFunction
     public void StartTraining(final String label) {
@@ -224,20 +140,20 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
     }
 
     @SimpleFunction
-    public void LoadModel(final String label, final String model) {
-        webview.evaluateJavascript("loadModel(\"" + label + "\",\"" + model + "\");", null);
+    public void LoadModel(final String filename) {
+        try {
+            String model = new String(Files.readAllBytes(Paths.get(MODEL_DIRECTORY + filename)));
+            webview.evaluateJavascript("loadModel(\"" + model + "\");", null);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Error(ERROR_FILE_EXCEPTION, e.getMessage());
+        }
     }
 
     @SimpleEvent
     public void ClassifierReady() {
         EventDispatcher.dispatchEvent(this, "ClassifierReady");
     }
-    /*
-    @SimpleEvent
-    public void AfterTraining(int responseCode, String message) {
-        EventDispatcher.dispatchEvent(this, "AfterTraining", responseCode, message);
-    }
-    */
 
     @SimpleEvent
     public void GotSampleCounts(YailList labels, YailList sampleCounts) {
@@ -255,8 +171,8 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
     }
 
     @SimpleEvent
-    public void GotSavedModel(String label, String model) {
-        EventDispatcher.dispatchEvent(this, "GotSavedModel", label, model);
+    public void DoneSavingModel(String filename) {
+        EventDispatcher.dispatchEvent(this, "DoneSavingModel", label);
     }
 
     @SimpleEvent
@@ -267,6 +183,23 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
     @SimpleEvent
     public void Error(int errorCode, String message) {
         EventDispatcher.dispatchEvent(this, "Error", errorCode, message);
+    }
+
+    private void saveModel(String model, String filename) {
+        // save to file system
+        String path = MODEL_DIRECTORY + filename;
+        new File(MODEL_DIRECTORY).mkdirs();
+        PrintStream out = null;
+        try {
+            out = new PrintStream(new FileOutputStream(path));
+            out.print(model);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Error(ERROR_FILE_EXCEPTION, e.getMessage());
+        } finally {
+            IOUtils.closeQuietly(LOG_TAG, out);
+        }
+        DoneSavingModel(filename);
     }
 
     @Override
@@ -332,12 +265,12 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
         }
 
         @JavascriptInterface
-        public void gotSavedModel(final String label, final String model) {
-            Log.d(LOG_TAG, "Entered gotSavedModel: " + label);
+        public void gotSavedModel(final String filename, final String model) {
+            Log.d(LOG_TAG, "Entered gotSavedModel: " + filename);
             form.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    GotSavedModel(label, model);
+                    saveModel(filename, model);
                 }
             });
         }

@@ -4785,10 +4785,6 @@ public interface OdeMessages extends Messages {
   @Description("")
   String ClassificationFailedEvents();
 
-  @DefaultMessage("GotSavedModel")
-  @Description("")
-  String GotSavedModelEvents();
-
   @DefaultMessage("DoneLoadingModel")
   @Description("")
   String DoneLoadingModelEvents();
