@@ -454,29 +454,45 @@ function setInputWidth(width) {
   video.height = video.videoHeight * width / video.videoWidth;
 }
 
-async function saveModel(label) {
-  if (!labelToClass.hasOwnProperty(label)) {
-    TeachableMachine.error(ERROR_LABEL_DOES_NOT_EXIST, label);
-    return;
+var temp;
+async function saveModel(encodedFilename) {
+  // loop through all classes
+  var classes = [];
+  for (var i = 0; i < NUM_CLASSES; i++) {
+    if (classToLabel.hasOwnProperty(i)) {
+      classes.push(classToLabel[i]);
+      classes.push(Array.from(await knn.classLogitsMatrices[i].data()));
+    }
   }
-  var output = await knn.classLogitsMatrices[labelToClass[label]].data();
-  TeachableMachine.gotSavedModel(label, JSON.stringify(Array.from(output)));
+  console.log(JSON.stringify(classes));
+  temp = encodeURIComponent(JSON.stringify(classes));
+  TeachableMachine.gotSavedModel(decodeURIComponent(encodedFilename), JSON.stringify(classes));
 }
 
-function loadModel(label, model) {
-  if (!labelToClass.hasOwnProperty(label)) {
-    if (availableClasses.length == 0) {
-      TeachableMachine.error(ERROR_NO_MORE_AVAILABLE_CLASSES, label);
-      return;
+function loadModel(encodedFilename, model) {
+  var array = JSON.parse(decodeURIComponent(model));
+  if (array.length > 2*NUM_CLASSES) {
+    TeachableMachine.error(ERROR_NO_MORE_AVAILABLE_CLASSES, decodeURIComponent(encodedFilename));
+    return;
+  }
+
+  // clear existing model
+  for (var i = 0; i < NUM_CLASSES; i++) {
+    if (classToLabel.hasOwnProperty(i)) {
+      clear(classToLabel[i]);
     }
+  }
+
+  for (var i = 0; i < array.length/2; i++) {
+    var label = array[i];
+    var data = array[i+1];
+    var tensor = tf.tensor2d(data, [data.length / 1000, 1000]);
+    knn.loadLogits(tensor, i);
     var c = availableClasses.shift();
     labelToClass[label] = c;
     classToLabel[c] = label;
   }
-  var array = JSON.parse(model);
-  var tensor = tf.tensor2d(array, [array.length / 1000, 1000]);
-  knn.loadLogits(tensor, labelToClass[label]);
   var sList = listSampleCounts();
   TeachableMachine.gotSampleCounts(JSON.stringify(sList[0]), JSON.stringify(sList[1]));
-  TeachableMachine.doneLoadingModel(label);
+  TeachableMachine.doneLoadingModel(decodeURIComponent(encodedFilename));
 }

@@ -30,6 +30,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.net.Uri.encode;
+
 /**
  * Component for classifying images.
  */
@@ -143,7 +145,7 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
     public void LoadModel(final String filename) {
         try {
             String model = new String(Files.readAllBytes(Paths.get(MODEL_DIRECTORY + filename)));
-            webview.evaluateJavascript("loadModel(\"" + model + "\");", null);
+            webview.evaluateJavascript("loadModel(\"" + encode(filename) + "\", \"" + encode(model) + "\");", null);
         } catch (IOException e) {
             e.printStackTrace();
             Error(ERROR_FILE_EXCEPTION, e.getMessage());
@@ -172,12 +174,12 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
 
     @SimpleEvent
     public void DoneSavingModel(String filename) {
-        EventDispatcher.dispatchEvent(this, "DoneSavingModel", label);
+        EventDispatcher.dispatchEvent(this, "DoneSavingModel", filename);
     }
 
     @SimpleEvent
-    public void DoneLoadingModel(String label) {
-        EventDispatcher.dispatchEvent(this, "DoneLoadingModel", label);
+    public void DoneLoadingModel(String filename) {
+        EventDispatcher.dispatchEvent(this, "DoneLoadingModel", filename);
     }
 
     @SimpleEvent
