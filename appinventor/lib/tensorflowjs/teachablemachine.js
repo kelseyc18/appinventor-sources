@@ -388,7 +388,8 @@ function animate() {
   timer = requestAnimationFrame(animate);
 }
 
-function startTraining(label) {
+function startTraining(encodedLabel) {
+  var label = decodeURIComponent(encodedLabel);
   if (!labelToClass.hasOwnProperty(label)) {
     if (availableClasses.length == 0) {
       TeachableMachine.error(ERROR_NO_MORE_AVAILABLE_CLASSES, label);
@@ -424,7 +425,8 @@ function getClassification() {
   return classToLabel[topChoice];
 }
 
-function clear(label) {
+function clear(encodedLabel) {
+  var label = decodeURIComponent(encodedLabel);
   if (!labelToClass.hasOwnProperty(label)) {
     TeachableMachine.error(ERROR_LABEL_DOES_NOT_EXIST, label);
     return;
@@ -464,13 +466,14 @@ async function saveModel(encodedFilename) {
       classes.push(Array.from(await knn.classLogitsMatrices[i].data()));
     }
   }
+  temp = JSON.stringify(classes);
   console.log(JSON.stringify(classes));
-  temp = encodeURIComponent(JSON.stringify(classes));
   TeachableMachine.gotSavedModel(decodeURIComponent(encodedFilename), JSON.stringify(classes));
 }
 
 function loadModel(encodedFilename, model) {
   var array = JSON.parse(decodeURIComponent(model));
+  console.log("TeachableMachine: array length=" + array.length);
   if (array.length > 2*NUM_CLASSES) {
     TeachableMachine.error(ERROR_NO_MORE_AVAILABLE_CLASSES, decodeURIComponent(encodedFilename));
     return;
@@ -483,16 +486,18 @@ function loadModel(encodedFilename, model) {
     }
   }
 
-  for (var i = 0; i < array.length/2; i++) {
+  for (var i = 0; i < array.length; i += 2) {
     var label = array[i];
     var data = array[i+1];
+    console.log("TeachableMachine: data[0]=" + data[0]);
     var tensor = tf.tensor2d(data, [data.length / 1000, 1000]);
-    knn.loadLogits(tensor, i);
+    knn.loadLogits(tensor, i/2);
     var c = availableClasses.shift();
     labelToClass[label] = c;
     classToLabel[c] = label;
   }
   var sList = listSampleCounts();
   TeachableMachine.gotSampleCounts(JSON.stringify(sList[0]), JSON.stringify(sList[1]));
+  console.log("TeachableMachine: doneLoadingModel for " + decodeURIComponent(encodedFilename));
   TeachableMachine.doneLoadingModel(decodeURIComponent(encodedFilename));
 }

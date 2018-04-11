@@ -44,7 +44,7 @@ import static android.net.Uri.encode;
 @UsesPermissions(permissionNames = "android.permission.INTERNET")
 public final class TeachableMachine extends AndroidViewComponent implements Component {
     private static final String LOG_TAG = TeachableMachine.class.getSimpleName();
-    private static final String MODEL_DIRECTORY = "/sdcard/AppInventor/assets/TeachableMachine";
+    private static final String MODEL_DIRECTORY = "/sdcard/AppInventor/assets/TeachableMachine/";
 
     private static final int ERROR_FILE_EXCEPTION = -3;
 
@@ -123,7 +123,7 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
 
     @SimpleFunction
     public void StartTraining(final String label) {
-        webview.evaluateJavascript("startTraining(\"" + label + "\");", null);
+        webview.evaluateJavascript("startTraining(\"" + encode(label) + "\");", null);
     }
 
     @SimpleFunction
@@ -133,12 +133,12 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
 
     @SimpleFunction
     public void Clear(final String label) {
-        webview.evaluateJavascript("clear(\"" + label + "\");", null);
+        webview.evaluateJavascript("clear(\"" + encode(label) + "\");", null);
     }
 
     @SimpleFunction
-    public void SaveModel(final String label) {
-        webview.evaluateJavascript("saveModel(\"" + label + "\");", null);
+    public void SaveModel(final String filename) {
+        webview.evaluateJavascript("saveModel(\"" + encode(filename) + "\");", null);
     }
 
     @SimpleFunction
@@ -187,7 +187,7 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
         EventDispatcher.dispatchEvent(this, "Error", errorCode, message);
     }
 
-    private void saveModel(String model, String filename) {
+    private void saveModel(String filename, String model) {
         // save to file system
         String path = MODEL_DIRECTORY + filename;
         new File(MODEL_DIRECTORY).mkdirs();
