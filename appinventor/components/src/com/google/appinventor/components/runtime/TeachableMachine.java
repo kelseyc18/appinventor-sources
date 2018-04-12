@@ -40,7 +40,7 @@ import static android.net.Uri.encode;
         category = ComponentCategory.EXPERIMENTAL,
         description = "Component for teaching a machine to recognize different images.")
 @SimpleObject
-@UsesAssets(fileNames = "teachablemachine.html, teachablemachine.js, group1-shard1of1, group10-shard1of1, group11-shard1of1, group12-shard1of1, group13-shard1of1, group14-shard1of1, group15-shard1of1, group16-shard1of1, group17-shard1of1, group18-shard1of1, group19-shard1of1, group2-shard1of1, group20-shard1of1, group21-shard1of1, group22-shard1of1, group23-shard1of1, group24-shard1of1, group25-shard1of1, group26-shard1of1, group27-shard1of1, group28-shard1of1, group29-shard1of1, group3-shard1of1, group30-shard1of1, group31-shard1of1, group32-shard1of1, group33-shard1of1, group34-shard1of1, group35-shard1of1, group36-shard1of1, group37-shard1of1, group38-shard1of1, group39-shard1of1, group4-shard1of1, group40-shard1of1, group41-shard1of1, group42-shard1of1, group43-shard1of1, group44-shard1of1, group45-shard1of1, group46-shard1of1, group47-shard1of1, group48-shard1of1, group49-shard1of1, group5-shard1of1, group50-shard1of1, group51-shard1of1, group52-shard1of1, group53-shard1of1, group54-shard1of1, group55-shard1of1, group6-shard1of1, group7-shard1of1, group8-shard1of1, group9-shard1of1, model.json, tfjs-0.8.0.js")
+@UsesAssets(fileNames = "teachablemachine.html, teachablemachine.js, group1-shard1of1, group10-shard1of1, group11-shard1of1, group12-shard1of1, group13-shard1of1, group14-shard1of1, group15-shard1of1, group16-shard1of1, group17-shard1of1, group18-shard1of1, group19-shard1of1, group2-shard1of1, group20-shard1of1, group21-shard1of1, group22-shard1of1, group23-shard1of1, group24-shard1of1, group25-shard1of1, group26-shard1of1, group27-shard1of1, group28-shard1of1, group29-shard1of1, group3-shard1of1, group30-shard1of1, group31-shard1of1, group32-shard1of1, group33-shard1of1, group34-shard1of1, group35-shard1of1, group36-shard1of1, group37-shard1of1, group38-shard1of1, group39-shard1of1, group4-shard1of1, group40-shard1of1, group41-shard1of1, group42-shard1of1, group43-shard1of1, group44-shard1of1, group45-shard1of1, group46-shard1of1, group47-shard1of1, group48-shard1of1, group49-shard1of1, group5-shard1of1, group50-shard1of1, group51-shard1of1, group52-shard1of1, group53-shard1of1, group54-shard1of1, group55-shard1of1, group6-shard1of1, group7-shard1of1, group8-shard1of1, group9-shard1of1, model.json, tfjs-0.9.1.js")
 @UsesPermissions(permissionNames = "android.permission.INTERNET")
 public final class TeachableMachine extends AndroidViewComponent implements Component {
   private static final String LOG_TAG = TeachableMachine.class.getSimpleName();
@@ -52,7 +52,7 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
 
   private final WebView webview;
   private final Form form;
-  private static TensorflowJSHTTPD httpdServer = null;
+  private static TensorFlowJSHTTPD httpdServer = null;
 
   public TeachableMachine(ComponentContainer container) {
     super(container);
@@ -76,7 +76,7 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
         Log.d(LOG_TAG, "onPermissionRequest called");
       }
     });
-    webview.loadUrl("http://localhost:8017/teachablemachine.html");
+    webview.loadUrl("http://localhost:" + String.valueOf(PORT) + "/teachablemachine.html");
     Log.d(LOG_TAG, "Created TeachableMachine component");
     container.$add(this);
   }
@@ -84,7 +84,7 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
   public void startHTTPD() {
     try {
       if (httpdServer == null) {
-        httpdServer = new TensorflowJSHTTPD(8017, new File("/sdcard/AppInventor/assets/"), form.$context());
+        httpdServer = new TensorFlowJSHTTPD(PORT, new File("/sdcard/AppInventor/assets/"), form.$context());
         Log.d(LOG_TAG, "startHTTPD");
       }
     } catch (IOException e) {
