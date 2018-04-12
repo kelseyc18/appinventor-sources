@@ -115,27 +115,27 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
     webview.evaluateJavascript("setInputWidth(" + width + ");", null);
   }
 
-  @SimpleFunction(description = "Start training machine to associate images from the camera with the provided label.")
+  @SimpleFunction(description = "Starts training machine to associate images from the camera with the provided label.")
   public void StartTraining(final String label) {
     webview.evaluateJavascript("startTraining(\"" + encode(label) + "\");", null);
   }
 
-  @SimpleFunction(description = "Stop training machine to associate images from the camera with the current label being trained.")
+  @SimpleFunction(description = "Stops training machine to associate images from the camera with the current label being trained.")
   public void StopTraining() {
     webview.evaluateJavascript("stopTraining();", null);
   }
 
-  @SimpleFunction(description = "Clear training data associated with provided label.")
+  @SimpleFunction(description = "Clears training data associated with provided label.")
   public void Clear(final String label) {
     webview.evaluateJavascript("clear(\"" + encode(label) + "\");", null);
   }
 
-  @SimpleFunction(description = "Save model (current set of samples and labels) with provided name.")
+  @SimpleFunction(description = "Saves model (current set of samples and labels) with provided name.")
   public void SaveModel(final String name) {
     webview.evaluateJavascript("saveModel(\"" + encode(name) + "\");", null);
   }
 
-  @SimpleFunction(description = "Load model with provided name.")
+  @SimpleFunction(description = "Loads model with provided name.")
   public void LoadModel(final String name) {
     try {
       String model = new String(Files.readAllBytes(Paths.get(MODEL_DIRECTORY + name)));
