@@ -1,12 +1,12 @@
-'use strict';
+"use strict";
 
-console.log('TeachableMachine: Using Tensorflow.js version ' + tf.version.tfjs);
+console.log("TeachableMachine: Using Tensorflow.js version " + tf.version.tfjs);
 
-// const MOBILENET_MODEL_PATH = 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json';
-const MOBILENET_MODEL_PATH = 'model.json';
+// const MOBILENET_MODEL_PATH = "https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json";
+const MOBILENET_MODEL_PATH = "model.json";
 
 var url = window.location.href;
-var index = url.indexOf('=');
+var index = url.indexOf("=");
 const NUM_CLASSES = (index >= 0) ? parseInt(url.substring(index + 1), 10) : 3;
 const IMAGE_SIZE = 224;
 const TOPK = 10;
@@ -32,7 +32,7 @@ class KNNImageClassifier {
     this.mobilenet.predict(zeros).dispose();
     zeros.dispose();
     this.varsLoaded = true;
-    console.log('TeachableMachine: KNNImageClassifier ready');
+    console.log("TeachableMachine: KNNImageClassifier ready");
   }
 
   clearClass(classIndex) {
@@ -48,7 +48,7 @@ class KNNImageClassifier {
 
   addImage(image, classIndex) {
     if (!this.varsLoaded) {
-      console.warn('Cannot add images until vars have been loaded.');
+      console.warn("Cannot add images until vars have been loaded.");
       return;
     }
     if (classIndex >= this.numClasses) {
@@ -82,7 +82,7 @@ class KNNImageClassifier {
 
   predict(image) {
     if (!this.varsLoaded) {
-      throw new Error('Cannot predict until vars have been loaded.');
+      throw new Error("Cannot predict until vars have been loaded.");
     }
     return tf.tidy(() => {
       const logits = tf.tidy(() => {
@@ -102,7 +102,7 @@ class KNNImageClassifier {
         this.trainLogitsMatrix = newTrainLogitsMatrix;
       }
       if (this.trainLogitsMatrix == null) {
-        console.warn('Cannot predict without providing training images.');
+        console.warn("Cannot predict without providing training images.");
         return null;
       }
       tf.keep(this.trainLogitsMatrix);
@@ -117,10 +117,10 @@ class KNNImageClassifier {
     let imageClass = -1;
     const confidences = new Array(this.numClasses);
     if (!this.varsLoaded) {
-      throw new Error('Cannot predict until vars have been loaded.');
+      throw new Error("Cannot predict until vars have been loaded.");
     }
     const knn = tf.tidy(() => {
-      return this.predict(image).asType('float32');
+      return this.predict(image).asType("float32");
     });
     const numExamples = this._getNumExamples();
     const kVal = Math.min(this.k, numExamples);
@@ -236,7 +236,7 @@ class KNNImageClassifier {
 
   loadLogits(logits, classIndex) {
     if (!this.varsLoaded) {
-      console.warn('Cannot add images until vars have been loaded.');
+      console.warn("Cannot add images until vars have been loaded.");
       return;
     }
     if (classIndex >= this.numClasses) {
@@ -257,11 +257,11 @@ var videoPlaying = false;
 
 var knn = new KNNImageClassifier(NUM_CLASSES, TOPK);
 
-var video = document.createElement('video');
-video.setAttribute('autoplay', '');
-video.setAttribute('playsinline', '');
+var video = document.createElement("video");
+video.setAttribute("autoplay", "");
+video.setAttribute("playsinline", "");
 video.width = 500;
-video.style.display = 'block';
+video.style.display = "block";
 
 var frontFacing = true;
 
@@ -282,16 +282,16 @@ for (let i = 0; i < NUM_CLASSES; i++) {
   availableClasses.push(i);
 }
 
-video.addEventListener('loadedmetadata', function () {
+video.addEventListener("loadedmetadata", function () {
   video.height = this.videoHeight * video.width / this.videoWidth;
 }, false);
 
 function startVideo() {
-  navigator.mediaDevices.getUserMedia({video: {facingMode: frontFacing ? 'user' : 'environment'}, audio: false})
+  navigator.mediaDevices.getUserMedia({video: {facingMode: frontFacing ? "user" : "environment"}, audio: false})
   .then(stream => {
     video.srcObject = stream;
-    video.addEventListener('playing', () => videoPlaying = true);
-    video.addEventListener('paused', () => videoPlaying = false);
+    video.addEventListener("playing", () => videoPlaying = true);
+    video.addEventListener("paused", () => videoPlaying = false);
   }).catch(e => log(e));
 }
 
@@ -448,7 +448,7 @@ function clear(encodedLabel) {
   if (classToLabel.hasOwnProperty(topChoice)) {
     TeachableMachine.gotClassification(classToLabel[topChoice]);
   } else {
-    TeachableMachine.gotClassification('');
+    TeachableMachine.gotClassification("");
   }
 }
 
@@ -457,9 +457,7 @@ function setInputWidth(width) {
   video.height = video.videoHeight * width / video.videoWidth;
 }
 
-var temp;
 async function saveModel(encodedName) {
-  // loop through all classes
   var classes = [];
   for (var i = 0; i < NUM_CLASSES; i++) {
     if (classToLabel.hasOwnProperty(i)) {
@@ -467,39 +465,31 @@ async function saveModel(encodedName) {
       classes.push(Array.from(await knn.classLogitsMatrices[i].data()));
     }
   }
-  temp = JSON.stringify(classes);
-  console.log(JSON.stringify(classes));
   TeachableMachine.gotSavedModel(decodeURIComponent(encodedName), JSON.stringify(classes));
 }
 
 function loadModel(encodedName, model) {
   var name = decodeURIComponent(encodedName);
   var array = JSON.parse(decodeURIComponent(model));
-  console.log("TeachableMachine: array length=" + array.length);
-  if (array.length > 2*NUM_CLASSES) {
+  if (array.length > 2 * NUM_CLASSES) {
     TeachableMachine.error("LoadModel: not enough classes available to load model with name " + name);
     return;
   }
-
-  // clear existing model
   for (var i = 0; i < NUM_CLASSES; i++) {
     if (classToLabel.hasOwnProperty(i)) {
       clear(classToLabel[i]);
     }
   }
-
-  for (var i = 0; i < array.length; i += 2) {
-    var label = array[i];
-    var data = array[i+1];
-    console.log("TeachableMachine: data[0]=" + data[0]);
+  for (var i = 0; i < array.length / 2; i ++) {
+    var label = array[2 * i];
+    var data = array[2 * i + 1];
     var tensor = tf.tensor2d(data, [data.length / 1000, 1000]);
-    knn.loadLogits(tensor, i/2);
+    knn.loadLogits(tensor, i);
     var c = availableClasses.shift();
     labelToClass[label] = c;
     classToLabel[c] = label;
   }
   var sList = listSampleCounts();
   TeachableMachine.gotSampleCounts(JSON.stringify(sList));
-  console.log("TeachableMachine: doneLoadingModel for " + name);
   TeachableMachine.doneLoadingModel(name);
 }
