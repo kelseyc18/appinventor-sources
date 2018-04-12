@@ -158,13 +158,13 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
     }
 
     @SimpleEvent
-    public void GotSampleCounts(YailList labels, YailList sampleCounts) {
-        EventDispatcher.dispatchEvent(this, "GotSampleCounts", labels, sampleCounts);
+    public void GotSampleCounts(YailList result) {
+        EventDispatcher.dispatchEvent(this, "GotSampleCounts", result);
     }
 
     @SimpleEvent
-    public void GotConfidences(YailList labels, YailList confidences) {
-        EventDispatcher.dispatchEvent(this, "GotConfidences", labels, confidences);
+    public void GotConfidences(YailList result) {
+        EventDispatcher.dispatchEvent(this, "GotConfidences", result);
     }
 
     @SimpleEvent
@@ -222,15 +222,19 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
         }
 
         @JavascriptInterface
-        public void gotSampleCounts(final String labels, final String sampleCounts) {
-            Log.d(LOG_TAG, "Entered gotSampleCounts: " + labels + " " + sampleCounts);
+        public void gotSampleCounts(final String result) {
+            Log.d(LOG_TAG, "Entered gotSampleCounts: " + result);
             form.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        JSONArray list1 = new JSONArray(labels);
-                        JSONArray list2 = new JSONArray(sampleCounts);
-                        GotSampleCounts(YailList.makeList(JsonUtil.getListFromJsonArray(list1)), YailList.makeList(JsonUtil.getListFromJsonArray(list2)));
+                        JSONArray list = new JSONArray(result);
+                        YailList intermediateList = YailList.makeList(JsonUtil.getListFromJsonArray(list));
+                        final List resultList = new ArrayList();
+                        for (int i = 0; i < intermediateList.size(); i++) {
+                            resultList.add(YailList.makeList((List) intermediateList.getObject(i)));
+                        }
+                        GotSampleCounts(YailList.makeList(resultList));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -239,15 +243,19 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
         }
 
         @JavascriptInterface
-        public void gotConfidences(final String labels, final String confidences) {
-            Log.d(LOG_TAG, "Entered gotConfidences: " + labels + " " + confidences);
+        public void gotConfidences(final String result) {
+            Log.d(LOG_TAG, "Entered gotConfidences: " + result);
             form.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        JSONArray list1 = new JSONArray(labels);
-                        JSONArray list2 = new JSONArray(confidences);
-                        GotConfidences(YailList.makeList(JsonUtil.getListFromJsonArray(list1)), YailList.makeList(JsonUtil.getListFromJsonArray(list2)));
+                        JSONArray list = new JSONArray(result);
+                        YailList intermediateList = YailList.makeList(JsonUtil.getListFromJsonArray(list));
+                        final List resultList = new ArrayList();
+                        for (int i = 0; i < intermediateList.size(); i++) {
+                            resultList.add(YailList.makeList((List) intermediateList.getObject(i)));
+                        }
+                        GotConfidences(YailList.makeList(resultList));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
