@@ -12,9 +12,6 @@ const IMAGE_SIZE = 224;
 const TOPK = 10;
 const MAX_EXAMPLES = 50;
 
-const ERROR_LABEL_DOES_NOT_EXIST = -1;
-const ERROR_NO_MORE_AVAILABLE_CLASSES = -2;
-
 class KNNImageClassifier {
   constructor(numClasses, k) {
     this.numClasses = numClasses;
@@ -396,7 +393,7 @@ function startTraining(encodedLabel) {
   var label = decodeURIComponent(encodedLabel);
   if (!labelToClass.hasOwnProperty(label)) {
     if (availableClasses.length == 0) {
-      TeachableMachine.error(ERROR_NO_MORE_AVAILABLE_CLASSES, label);
+      TeachableMachine.error("StartTraining: no more classes available to train label " + label);
       return;
     }
     var c = availableClasses.shift();
@@ -432,7 +429,7 @@ function getClassification() {
 function clear(encodedLabel) {
   var label = decodeURIComponent(encodedLabel);
   if (!labelToClass.hasOwnProperty(label)) {
-    TeachableMachine.error(ERROR_LABEL_DOES_NOT_EXIST, label);
+    TeachableMachine.error("Clear: Label " + label + " does not exist");
     return;
   }
   if (training === labelToClass[label]) {
@@ -461,7 +458,7 @@ function setInputWidth(width) {
 }
 
 var temp;
-async function saveModel(encodedFilename) {
+async function saveModel(encodedName) {
   // loop through all classes
   var classes = [];
   for (var i = 0; i < NUM_CLASSES; i++) {
@@ -472,14 +469,15 @@ async function saveModel(encodedFilename) {
   }
   temp = JSON.stringify(classes);
   console.log(JSON.stringify(classes));
-  TeachableMachine.gotSavedModel(decodeURIComponent(encodedFilename), JSON.stringify(classes));
+  TeachableMachine.gotSavedModel(decodeURIComponent(encodedName), JSON.stringify(classes));
 }
 
-function loadModel(encodedFilename, model) {
+function loadModel(encodedName, model) {
+  var name = decodeURIComponent(encodedName);
   var array = JSON.parse(decodeURIComponent(model));
   console.log("TeachableMachine: array length=" + array.length);
   if (array.length > 2*NUM_CLASSES) {
-    TeachableMachine.error(ERROR_NO_MORE_AVAILABLE_CLASSES, decodeURIComponent(encodedFilename));
+    TeachableMachine.error("LoadModel: not enough classes available to load model with name " + name);
     return;
   }
 
@@ -502,6 +500,6 @@ function loadModel(encodedFilename, model) {
   }
   var sList = listSampleCounts();
   TeachableMachine.gotSampleCounts(JSON.stringify(sList));
-  console.log("TeachableMachine: doneLoadingModel for " + decodeURIComponent(encodedFilename));
-  TeachableMachine.doneLoadingModel(decodeURIComponent(encodedFilename));
+  console.log("TeachableMachine: doneLoadingModel for " + name);
+  TeachableMachine.doneLoadingModel(name);
 }
