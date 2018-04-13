@@ -6982,10 +6982,6 @@ public interface OdeMessages extends Messages {
   @Description("")
   String errorMessageParams();
 
-  @DefaultMessage("errorCode")
-  @Description("")
-  String errorCodeParams();
-
   @DefaultMessage("label")
   @Description("")
   String labelParams();

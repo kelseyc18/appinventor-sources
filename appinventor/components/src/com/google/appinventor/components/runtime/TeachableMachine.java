@@ -46,8 +46,6 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
   private static final String LOG_TAG = TeachableMachine.class.getSimpleName();
   private static final String MODEL_DIRECTORY = "/sdcard/AppInventor/assets/TeachableMachine/";
 
-  // must be consistent with teachablemachine.js default number of classes
-  public static final int DEFAULT_NUM_OF_CLASSES = 3;
   public static final int PORT = 8017;
 
   private final WebView webview;
@@ -93,18 +91,6 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
     }
   }
 
-  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_NON_NEGATIVE_INTEGER,
-          defaultValue = "3")
-  @SimpleProperty(userVisible = false, description = "Number of labels the machine can be trained to recognize.")
-  public void NumberOfLabels(int num) {
-    Log.d(LOG_TAG, "NumberOfLabels is " + String.valueOf(num));
-    if (num == DEFAULT_NUM_OF_CLASSES) {
-      webview.loadUrl("http://localhost:" + String.valueOf(PORT) + "/teachablemachine.html");
-    } else {
-      webview.loadUrl("http://localhost:" + String.valueOf(PORT) + "teachablemachine.html?n=" + String.valueOf(num));
-    }
-  }
-
   @SimpleFunction(description = "Toggles between user-facing and environment-facing camera.")
   public void ToggleCameraFacingMode() {
     webview.evaluateJavascript("toggleCameraFacingMode();", null);
@@ -120,7 +106,7 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
     webview.evaluateJavascript("startTraining(\"" + encode(label) + "\");", null);
   }
 
-  @SimpleFunction(description = "Stops training machine to associate images from the camera with the current label being trained.")
+  @SimpleFunction(description = "Stops collecting images from the camera to train machine.")
   public void StopTraining() {
     webview.evaluateJavascript("stopTraining();", null);
   }
@@ -302,4 +288,3 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
     }
   }
 }
-

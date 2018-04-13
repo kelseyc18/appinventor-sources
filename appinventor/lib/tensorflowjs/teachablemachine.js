@@ -5,9 +5,7 @@ console.log("TeachableMachine: Using Tensorflow.js version " + tf.version.tfjs);
 // const MOBILENET_MODEL_PATH = "https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json";
 const MOBILENET_MODEL_PATH = "model.json";
 
-var url = window.location.href;
-var index = url.indexOf("=");
-const NUM_CLASSES = (index >= 0) ? parseInt(url.substring(index + 1), 10) : 3;
+const NUM_CLASSES = 50;
 const IMAGE_SIZE = 224;
 const TOPK = 10;
 const MAX_EXAMPLES = 50;
@@ -407,25 +405,6 @@ function stopTraining() {
   training = -1;
 }
 
-function getSampleCount(label) {
-  if (!labelToClass.hasOwnProperty(label)) {
-    return -1;
-  }
-  var counts = knn.getClassExampleCount();
-  return counts[labelToClass[label]];
-}
-
-function getConfidence(label) {
-  if (!labelToClass.hasOwnProperty(label)) {
-    return -1;
-  }
-  return confidences[labelToClass[label]];
-}
-
-function getClassification() {
-  return classToLabel[topChoice];
-}
-
 function clear(encodedLabel) {
   var label = decodeURIComponent(encodedLabel);
   if (!labelToClass.hasOwnProperty(label)) {
@@ -480,7 +459,7 @@ function loadModel(encodedName, model) {
       clear(classToLabel[i]);
     }
   }
-  for (var i = 0; i < array.length / 2; i ++) {
+  for (var i = 0; i < array.length / 2; i++) {
     var label = array[2 * i];
     var data = array[2 * i + 1];
     var tensor = tf.tensor2d(data, [data.length / 1000, 1000]);
