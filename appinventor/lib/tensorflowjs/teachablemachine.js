@@ -459,8 +459,8 @@ function loadModel(encodedName, model) {
     var label = array[2 * i];
     var data = array[2 * i + 1];
     var tensor = tf.tensor2d(data, [data.length / 1000, 1000]);
-    knn.loadLogits(tensor, i);
     var c = availableClasses.shift();
+    knn.loadLogits(tensor, c);
     labelToClass[label] = c;
     classToLabel[c] = label;
   }
