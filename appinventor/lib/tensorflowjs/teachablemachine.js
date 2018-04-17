@@ -330,7 +330,7 @@ function listSampleCounts() {
   var sampleCounts = knn.getClassExampleCount();
   var sList = [];
   for (let i = 0; i < NUM_CLASSES; i++) {
-    if (classToLabel.hasOwnProperty(i)) {
+    if (classToLabel.hasOwnProperty(i) && sampleCounts.hasOwnProperty(i)) {
       var classAndCount = [];
       classAndCount.push(classToLabel[i]);
       classAndCount.push(sampleCounts[i]);
@@ -343,7 +343,7 @@ function listSampleCounts() {
 function listConfidences() {
   var cList = [];
   for (let i = 0; i < NUM_CLASSES; i++) {
-    if (classToLabel.hasOwnProperty(i)) {
+    if (classToLabel.hasOwnProperty(i) && confidences.hasOwnProperty(i)) {
       var classAndConfidence = [];
       classAndConfidence.push(classToLabel[i]);
       classAndConfidence.push(confidences[i]);
