@@ -36,7 +36,7 @@ public class TensorFlowJSHTTPD extends NanoHTTPD {
       String mimeType;
       InputStream inputStream;
       if (componentList.contains(uri.substring(1))) {
-        if (uri.contains(".html")) {
+        if (uri.endsWith(".html")) {
           mimeType = "text/html";
         } else if (uri.endsWith(".js")) {
           mimeType = "application/javascript";
