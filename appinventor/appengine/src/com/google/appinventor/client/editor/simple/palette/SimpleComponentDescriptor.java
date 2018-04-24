@@ -34,6 +34,7 @@ import com.google.appinventor.client.editor.simple.components.MockLook;
 import com.google.appinventor.client.editor.simple.components.MockMap;
 import com.google.appinventor.client.editor.simple.components.MockMarker;
 import com.google.appinventor.client.editor.simple.components.MockNonVisibleComponent;
+import com.google.appinventor.client.editor.simple.components.MockOCR;
 import com.google.appinventor.client.editor.simple.components.MockPasswordTextBox;
 import com.google.appinventor.client.editor.simple.components.MockPhoneNumberPicker;
 import com.google.appinventor.client.editor.simple.components.MockPolygon;
@@ -412,6 +413,8 @@ public final class SimpleComponentDescriptor {
       return new MockLook(editor, MockLook.TYPE);
     } else if (name.equals(MockTeachableMachine.TYPE)) {
       return new MockTeachableMachine(editor, MockTeachableMachine.TYPE);
+    } else if (name.equals(MockOCR.TYPE)) {
+      return new MockOCR(editor, MockOCR.TYPE);
     } else if (name.equals(MockSpinner.TYPE)) {
       return new MockSpinner(editor);
     } else if (name.equals(MockMap.TYPE)) {

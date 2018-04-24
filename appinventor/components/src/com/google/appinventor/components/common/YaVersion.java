@@ -1130,6 +1130,10 @@ public class YaVersion {
   // - Initial version.
   public static final int TEACHABLEMACHINE_COMPONENT_VERSION = 1;
 
+  // For OCR_COMPONENT_VERSION 1:
+  // - Initial version.
+  public static final int OCR_COMPONENT_VERSION = 1;
+
   // For MEDIASTORE_COMPONENT_VERSION 1:
   // - Initial Version.
   public static final int MEDIASTORE_COMPONENT_VERSION = 1;
