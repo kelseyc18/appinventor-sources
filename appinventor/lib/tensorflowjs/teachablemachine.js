@@ -367,7 +367,7 @@ function animate() {
       knn.predictClass(image)
       .then(res => {
         for(let i = 0; i < NUM_CLASSES; i++) {
-          if(res.classIndex == i) {
+          if(res.classIndex === i) {
             topChoice = i;
           }
           if(exampleCount[i] > 0) {
