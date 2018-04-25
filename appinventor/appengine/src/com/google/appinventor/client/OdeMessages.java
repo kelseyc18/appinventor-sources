@@ -7115,8 +7115,4 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("LoadModel")
   @Description("")
   String LoadModelMethods();
-
-  @DefaultMessage("NumberOfLabels")
-  @Description("")
-  String NumberOfLabelsProperties();
 }
