@@ -614,7 +614,6 @@ public final class Compiler {
           out.write("  <uses-feature android:name=\"android.hardware.camera\" android:required=\"false\" />\n");
           out.write("  <uses-feature android:name=\"android.hardware.camera.autofocus\" android:required=\"false\" />\n");
           out.write("  <uses-feature android:name=\"android.hardware.wifi\" />\n"); // We actually require wifi
-          out.write("  <uses-feature android:glEsVersion=\"0x00020000\" android:required=\"false\" />");
       }
 
       int minSdk = Integer.parseInt((project.getMinSdk() == null) ? DEFAULT_MIN_SDK : project.getMinSdk());
@@ -628,7 +627,6 @@ public final class Compiler {
           }
         }
       }
-      minSdk = 22;
 
       // make permissions unique by putting them in one set
       Set<String> permissions = Sets.newHashSet();
@@ -639,8 +637,6 @@ public final class Compiler {
       for (String permission : permissions) {
         out.write("  <uses-permission android:name=\"" + permission + "\" />\n");
       }
-
-      out.write("  <uses-permission android:name=\"android.permission.CAMERA\" />\n");
 
       if (isForCompanion) {      // This is so ACRA can do a logcat on phones older then Jelly Bean
         out.write("  <uses-permission android:name=\"android.permission.READ_LOGS\" />\n");
@@ -708,7 +704,7 @@ public final class Compiler {
 
         // The keyboard option prevents the app from stopping when a external (bluetooth)
         // keyboard is attached.
-        out.write("android:configChanges=\"orientation|keyboardHidden|screenSize|keyboard\">\n");
+        out.write("android:configChanges=\"orientation|keyboardHidden|keyboard\">\n");
 
 
         out.write("      <intent-filter>\n");

@@ -4785,9 +4785,9 @@ public interface OdeMessages extends Messages {
   @Description("")
   String GotClassificationEvents();
 
-  @DefaultMessage("ClassificationFailed")
+  @DefaultMessage("Error")
   @Description("")
-  String ClassificationFailedEvents();
+  String ErrorEvents();
 
   @DefaultMessage("DoneSavingModel")
   @Description("")
@@ -4796,10 +4796,6 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("DoneLoadingModel")
   @Description("")
   String DoneLoadingModelEvents();
-
-  @DefaultMessage("Error")
-  @Description("")
-  String ErrorEvents();
 
   @DefaultMessage("GotProgress")
   @Description("")
@@ -7076,14 +7072,6 @@ public interface OdeMessages extends Messages {
   @Description("")
   String SetCenterMethods();
 
-  @DefaultMessage("StartVideo")
-  @Description("")
-  String StartVideoMethods();
-
-  @DefaultMessage("StopVideo")
-  @Description("")
-  String StopVideoMethods();
-
   @DefaultMessage("ToggleCameraFacingMode")
   @Description("")
   String ToggleCameraFacingModeMethods();
@@ -7096,21 +7084,13 @@ public interface OdeMessages extends Messages {
   @Description("")
   String ClassifyVideoDataMethods();
 
-  @DefaultMessage("ShowImage")
+  @DefaultMessage("errorCode")
   @Description("")
-  String ShowImageMethods();
-
-  @DefaultMessage("HideImage")
-  @Description("")
-  String HideImageMethods();
+  String errorCodeParams();
 
   @DefaultMessage("inputMode")
   @Description("")
   String inputModeParams();
-
-  @DefaultMessage("SetInputWidth")
-  @Description("")
-  String SetInputWidthMethods();
 
   @DefaultMessage("StartTraining")
   @Description("")
