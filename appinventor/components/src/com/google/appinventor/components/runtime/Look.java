@@ -1,6 +1,5 @@
 // -*- mode: java; c-basic-offset: 2; -*-
-// Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright 2018 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -16,21 +15,33 @@ import android.webkit.WebViewClient;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.PermissionRequest;
-import com.google.appinventor.components.annotations.*;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import com.google.appinventor.components.annotations.DesignerComponent;
+import com.google.appinventor.components.annotations.SimpleEvent;
+import com.google.appinventor.components.annotations.SimpleFunction;
+import com.google.appinventor.components.annotations.SimpleObject;
+import com.google.appinventor.components.annotations.UsesAssets;
+import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.YaVersion;
-import com.google.appinventor.components.runtime.util.*;
+import com.google.appinventor.components.runtime.util.JsonUtil;
+import com.google.appinventor.components.runtime.util.MediaUtil;
+import com.google.appinventor.components.runtime.util.YailList;
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
+import java.io.InputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Component that classifies images.
+ *
+ * @author kevinzhu@mit.edu (Kevin Zhu)
+ * @author kelseyc@mit.edu (Kelsey Chan)
  */
 
 @DesignerComponent(version = YaVersion.LOOK_COMPONENT_VERSION,
@@ -43,50 +54,64 @@ public final class Look extends AndroidViewComponent implements Component {
   private static final String LOG_TAG = Look.class.getSimpleName();
   private static final int IMAGE_WIDTH = 500;
   public static final int IMAGE_QUALITY = 100;
-  public static final int PORT = 8016;
+
+  private static final String modelPrefix = "https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/";
+
+  // other error codes are defined in look.js
+  public static final int ERROR_CLASSIFICATION_NOT_SUPPORTED = -1;
+  public static final int ERROR_CLASSIFICATION_FAILED = -2;
+  public static final int ERROR_CANNOT_TOGGLE_CAMERA_IN_IMAGE_MODE = -3;
+  public static final int ERROR_CANNOT_CLASSIFY_IMAGE_IN_VIDEO_MODE = -4;
+  public static final int ERROR_CANNOT_CLASSIFY_VIDEO_IN_IMAGE_MODE = -5;
 
   private final WebView webview;
   private final Form form;
-  private static TensorFlowJSHTTPD httpdServer = null;
 
   public Look(ComponentContainer container) {
     super(container);
     this.form = container.$form();
-    startHTTPD();
-    // Log.d(LOG_TAG, form.$context().getFilesDir().getAbsolutePath());
     webview = new WebView(container.$context());
     webview.getSettings().setJavaScriptEnabled(true);
     webview.getSettings().setMediaPlaybackRequiresUserGesture(false);
     // adds a way to send strings to the javascript
     webview.addJavascriptInterface(new JsObject(), "Look");
-    webview.setWebViewClient(new WebViewClient());
+    webview.setWebViewClient(new WebViewClient() {
+      @Override
+      public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+        Log.d(LOG_TAG, "shouldInterceptRequest called");
+        if (url.contains(modelPrefix)) {
+          Log.d(LOG_TAG, "overriding " + url);
+          try {
+            InputStream inputStream = form.$context().getAssets().open("component/" + url.substring(modelPrefix.length()));
+            if (url.endsWith(".json")) {
+              return new WebResourceResponse("application/json", "UTF-8", inputStream);
+            } else {
+              return new WebResourceResponse("application/octet-stream", "binary", inputStream);
+            }
+          } catch (IOException e) {
+            e.printStackTrace();
+            return super.shouldInterceptRequest(view, url);
+          }
+        }
+        Log.d(LOG_TAG, url);
+        return super.shouldInterceptRequest(view, url);
+      }
+    });
     webview.setWebChromeClient(new WebChromeClient() {
       @Override
       public void onPermissionRequest(PermissionRequest request) {
+        Log.d(LOG_TAG, "onPermissionRequest called");
         String[] requestedResources = request.getResources();
         for (String r : requestedResources) {
           if (r.equals(PermissionRequest.RESOURCE_VIDEO_CAPTURE)) {
             request.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});
           }
         }
-        Log.d(LOG_TAG, "onPermissionRequest called");
       }
     });
-    webview.loadUrl("http://localhost:" + String.valueOf(PORT) + "/look.html");
+    webview.loadUrl("file:///android_asset/component/look.html");
     Log.d(LOG_TAG, "Created Look component");
     container.$add(this);
-  }
-
-  private void startHTTPD() {
-    try {
-      if (httpdServer == null) {
-        httpdServer = new TensorFlowJSHTTPD(PORT, new File("/sdcard/AppInventor/assets/"), form.$context());
-        Log.d(LOG_TAG, "startHTTPD");
-      }
-    } catch (IOException e) {
-      Log.d(LOG_TAG, "startHTTPD not working: ");
-      e.printStackTrace();
-    }
   }
 
   @SimpleFunction(description = "Performs classification on the image at the given path and triggers the GotClassification event when classification is finished successfully.")
@@ -117,16 +142,6 @@ public final class Look extends AndroidViewComponent implements Component {
     webview.evaluateJavascript("classifyImageData(\"" + imageEncodedbase64String + "\");", null);
   }
 
-  @SimpleFunction(description = "Starts the video if input mode has been set to video. Does nothing if input mode is set to image.")
-  public void StartVideo() {
-    webview.evaluateJavascript("startVideo();", null);
-  }
-
-  @SimpleFunction(description = "Stops the video.")
-  public void StopVideo() {
-    webview.evaluateJavascript("stopVideo();", null);
-  }
-
   @SimpleFunction(description = "Toggles between user-facing and environment-facing camera.")
   public void ToggleCameraFacingMode() {
     webview.evaluateJavascript("toggleCameraFacingMode();", null);
@@ -137,24 +152,9 @@ public final class Look extends AndroidViewComponent implements Component {
     webview.evaluateJavascript("classifyVideoData();", null);
   }
 
-  @SimpleFunction(description = "Shows the image that was last classified if input mode is image.")
-  public void ShowImage() {
-    webview.evaluateJavascript("showImage();", null);
-  }
-
-  @SimpleFunction(description = "Hides the image that was last classified. Does nothing if input mode is set to video.")
-  public void HideImage() {
-    webview.evaluateJavascript("hideImage();", null);
-  }
-
   @SimpleFunction(description = "Sets the input mode to image if inputMode is \"image\" or video if inputMode is \"video\".")
   public void SetInputMode(final String inputMode) {
     webview.evaluateJavascript("setInputMode(\"" + inputMode + "\");", null);
-  }
-
-  @SimpleFunction(description = "Sets the image or video width to the specified value (in pixels).")
-  public void SetInputWidth(final int width) {
-    webview.evaluateJavascript("setInputWidth(" + width + ");", null);
   }
 
   @SimpleEvent(description = "Event indicating that the classifier is ready.")
@@ -167,9 +167,9 @@ public final class Look extends AndroidViewComponent implements Component {
     EventDispatcher.dispatchEvent(this, "GotClassification", result);
   }
 
-  @SimpleEvent(description = "Event indicating that classification has failed.")
-  public void ClassificationFailed() {
-    EventDispatcher.dispatchEvent(this, "ClassificationFailed");
+  @SimpleEvent(description = "Event indicating that an error has occurred.")
+  public void Error(final int errorCode) {
+    EventDispatcher.dispatchEvent(this, "Error", errorCode);
   }
 
   @Override
@@ -209,8 +209,19 @@ public final class Look extends AndroidViewComponent implements Component {
       } catch (JSONException e) {
         Log.d(LOG_TAG, "Entered catch of reportResult");
         e.printStackTrace();
-        ClassificationFailed();
+        Error(ERROR_CLASSIFICATION_FAILED);
       }
+    }
+
+    @JavascriptInterface
+    public void error(final int errorCode) {
+      Log.d(LOG_TAG, "Entered error: " + errorCode);
+      form.runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+          Error(errorCode);
+        }
+      });
     }
   }
 }

@@ -11,20 +11,35 @@ import android.graphics.drawable.BitmapDrawable;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.webkit.*;
-import com.google.appinventor.components.annotations.*;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebViewClient;
+import android.webkit.WebChromeClient;
+import android.webkit.WebView;
+import android.webkit.PermissionRequest;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import com.google.appinventor.components.annotations.DesignerComponent;
+import com.google.appinventor.components.annotations.SimpleEvent;
+import com.google.appinventor.components.annotations.SimpleFunction;
+import com.google.appinventor.components.annotations.SimpleObject;
+import com.google.appinventor.components.annotations.UsesAssets;
+import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.common.PropertyTypeConstants;
+import com.google.appinventor.components.runtime.util.IOUtils;
 import com.google.appinventor.components.runtime.util.JsonUtil;
 import com.google.appinventor.components.runtime.util.MediaUtil;
 import com.google.appinventor.components.runtime.util.YailList;
-import com.google.appinventor.components.runtime.util.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.io.*;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -46,59 +61,61 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
   private static final String LOG_TAG = TeachableMachine.class.getSimpleName();
   private static final String MODEL_DIRECTORY = "/sdcard/AppInventor/assets/TeachableMachine/";
 
-  public static final int PORT = 8017;
+  private static final String MODEL_PREFIX = "https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/";
 
   private final WebView webview;
   private final Form form;
-  private static TensorFlowJSHTTPD httpdServer = null;
 
   public TeachableMachine(ComponentContainer container) {
     super(container);
     this.form = container.$form();
-    startHTTPD();
     webview = new WebView(container.$context());
     webview.getSettings().setJavaScriptEnabled(true);
     webview.getSettings().setMediaPlaybackRequiresUserGesture(false);
     // adds a way to send strings to the javascript
     webview.addJavascriptInterface(new JsObject(), "TeachableMachine");
-    webview.setWebViewClient(new WebViewClient());
+    webview.setWebViewClient(new WebViewClient() {
+      @Override
+      public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+        Log.d(LOG_TAG, "shouldInterceptRequest called");
+        if (url.contains(MODEL_PREFIX)) {
+          Log.d(LOG_TAG, "overriding " + url);
+          try {
+            InputStream inputStream = form.$context().getAssets().open("component/" + url.substring(MODEL_PREFIX.length()));
+            if (url.endsWith(".json")) {
+              return new WebResourceResponse("application/json", "UTF-8", inputStream);
+            } else {
+              return new WebResourceResponse("application/octet-stream", "binary", inputStream);
+            }
+          } catch (IOException e) {
+            e.printStackTrace();
+            return super.shouldInterceptRequest(view, url);
+          }
+        }
+        Log.d(LOG_TAG, url);
+        return super.shouldInterceptRequest(view, url);
+      }
+    });
     webview.setWebChromeClient(new WebChromeClient() {
       @Override
       public void onPermissionRequest(PermissionRequest request) {
+        Log.d(LOG_TAG, "onPermissionRequest called");
         String[] requestedResources = request.getResources();
         for (String r : requestedResources) {
           if (r.equals(PermissionRequest.RESOURCE_VIDEO_CAPTURE)) {
             request.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});
           }
         }
-        Log.d(LOG_TAG, "onPermissionRequest called");
       }
     });
-    webview.loadUrl("http://localhost:" + String.valueOf(PORT) + "/teachablemachine.html");
+    webview.loadUrl("file:///android_asset/component/teachablemachine.html");
     Log.d(LOG_TAG, "Created TeachableMachine component");
     container.$add(this);
-  }
-
-  public void startHTTPD() {
-    try {
-      if (httpdServer == null) {
-        httpdServer = new TensorFlowJSHTTPD(PORT, new File("/sdcard/AppInventor/assets/"), form.$context());
-        Log.d(LOG_TAG, "startHTTPD");
-      }
-    } catch (IOException e) {
-      Log.d(LOG_TAG, "startHTTPD not working: ");
-      e.printStackTrace();
-    }
   }
 
   @SimpleFunction(description = "Toggles between user-facing and environment-facing camera.")
   public void ToggleCameraFacingMode() {
     webview.evaluateJavascript("toggleCameraFacingMode();", null);
-  }
-
-  @SimpleFunction(description = "Sets the image or video width to the specified value.")
-  public void SetInputWidth(final int width) {
-    webview.evaluateJavascript("setInputWidth(" + width + ");", null);
   }
 
   @SimpleFunction(description = "Starts training machine to associate images from the camera with the provided label.")
