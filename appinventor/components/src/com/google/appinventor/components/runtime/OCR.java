@@ -16,10 +16,15 @@ import android.webkit.WebViewClient;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.PermissionRequest;
-import com.google.appinventor.components.annotations.*;
+import com.google.appinventor.components.annotations.DesignerComponent;
+import com.google.appinventor.components.annotations.SimpleEvent;
+import com.google.appinventor.components.annotations.SimpleFunction;
+import com.google.appinventor.components.annotations.SimpleObject;
+import com.google.appinventor.components.annotations.UsesAssets;
+import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.YaVersion;
-import com.google.appinventor.components.runtime.util.*;
+import com.google.appinventor.components.runtime.util.MediaUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -46,13 +51,10 @@ public final class OCR extends AndroidViewComponent implements Component {
 
   private final WebView webview;
   private final Form form;
-  private static TensorFlowJSHTTPD httpdServer = null;
 
   public OCR(ComponentContainer container) {
     super(container);
     this.form = container.$form();
-    // startHTTPD();
-    // Log.d(LOG_TAG, form.$context().getFilesDir().getAbsolutePath());
     webview = new WebView(container.$context());
     webview.getSettings().setJavaScriptEnabled(true);
     webview.getSettings().setMediaPlaybackRequiresUserGesture(false);
@@ -72,21 +74,8 @@ public final class OCR extends AndroidViewComponent implements Component {
       }
     });
     webview.loadUrl("https://kelseyc18.github.io/appinventor-ocr/");
-    // webview.loadUrl("http://localhost:" + String.valueOf(PORT) + "/ocr.html");
     Log.d(LOG_TAG, "Created OCR component");
     container.$add(this);
-  }
-
-  private void startHTTPD() {
-    try {
-      if (httpdServer == null) {
-        httpdServer = new TensorFlowJSHTTPD(PORT, new File("/sdcard/AppInventor/assets/"), form.$context());
-        Log.d(LOG_TAG, "startHTTPD");
-      }
-    } catch (IOException e) {
-      Log.d(LOG_TAG, "startHTTPD not working: ");
-      e.printStackTrace();
-    }
   }
 
   @SimpleFunction(description = "Performs classification on the image at the given path and triggers the GotClassification event when classification is finished successfully.")
@@ -122,16 +111,6 @@ public final class OCR extends AndroidViewComponent implements Component {
     webview.evaluateJavascript("setLanguage(\"" + language + "\");", null);
   }
 
-  @SimpleFunction(description = "Starts the video if input mode has been set to video. Does nothing if input mode is set to image.")
-  public void StartVideo() {
-    webview.evaluateJavascript("startVideo();", null);
-  }
-
-  @SimpleFunction(description = "Stops the video.")
-  public void StopVideo() {
-    webview.evaluateJavascript("stopVideo();", null);
-  }
-
   @SimpleFunction(description = "Toggles between user-facing and environment-facing camera.")
   public void ToggleCameraFacingMode() {
     webview.evaluateJavascript("toggleCameraFacingMode();", null);
@@ -142,24 +121,9 @@ public final class OCR extends AndroidViewComponent implements Component {
     webview.evaluateJavascript("recognizeVideoData();", null);
   }
 
-  @SimpleFunction(description = "Shows the image that was last classified if input mode is image.")
-  public void ShowImage() {
-    webview.evaluateJavascript("showImage();", null);
-  }
-
-  @SimpleFunction(description = "Hides the image that was last classified. Does nothing if input mode is set to video.")
-  public void HideImage() {
-    webview.evaluateJavascript("hideImage();", null);
-  }
-
   @SimpleFunction(description = "Sets the input mode to image if inputMode is \"image\" or video if inputMode is \"video\".")
   public void SetInputMode(final String inputMode) {
     webview.evaluateJavascript("setInputMode(\"" + inputMode + "\");", null);
-  }
-
-  @SimpleFunction(description = "Sets the image or video width to the specified value (in pixels).")
-  public void SetInputWidth(final int width) {
-    webview.evaluateJavascript("setInputWidth(" + width + ");", null);
   }
 
   @SimpleEvent(description = "Event indicating that the classifier is ready.")
