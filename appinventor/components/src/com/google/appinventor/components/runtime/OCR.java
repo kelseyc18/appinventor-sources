@@ -24,7 +24,9 @@ import com.google.appinventor.components.annotations.UsesAssets;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.YaVersion;
+import com.google.appinventor.components.runtime.util.JsonUtil;
 import com.google.appinventor.components.runtime.util.MediaUtil;
+import com.google.appinventor.components.runtime.util.YailList;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -33,6 +35,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.net.Uri.encode;
 
 /**
  * Component that recognizes text.
@@ -45,7 +49,7 @@ import java.util.List;
 @UsesPermissions(permissionNames = "android.permission.INTERNET, android.permission.CAMERA")
 public final class OCR extends AndroidViewComponent implements Component {
   private static final String LOG_TAG = OCR.class.getSimpleName();
-  private static final int IMAGE_WIDTH = 500;
+  private static final int IMAGE_WIDTH = 750;
   public static final int IMAGE_QUALITY = 100;
   public static final int PORT = 8018;
 
@@ -111,6 +115,11 @@ public final class OCR extends AndroidViewComponent implements Component {
     webview.evaluateJavascript("setLanguage(\"" + language + "\");", null);
   }
 
+  @SimpleFunction(description = "temp")
+  public void Clear() {
+    webview.evaluateJavascript("clear();", null);
+  }
+
   @SimpleFunction(description = "Toggles between user-facing and environment-facing camera.")
   public void ToggleCameraFacingMode() {
     webview.evaluateJavascript("toggleCameraFacingMode();", null);
@@ -126,19 +135,34 @@ public final class OCR extends AndroidViewComponent implements Component {
     webview.evaluateJavascript("setInputMode(\"" + inputMode + "\");", null);
   }
 
+  @SimpleFunction(description = "temp")
+  public void DrawBoundingBox(final int index, final String label) {
+    webview.evaluateJavascript("drawBoundingBox(" + (index - 1) + ",\"" + encode(label) + "\");", null);
+  }
+
   @SimpleEvent(description = "Event indicating that the classifier is ready.")
   public void ClassifierReady() {
     EventDispatcher.dispatchEvent(this, "ClassifierReady");
   }
 
   @SimpleEvent(description = "temp")
-  public void GotProgress(String result) {
-    EventDispatcher.dispatchEvent(this, "GotProgress", result);
+  public void GotProgress(String progress) {
+    EventDispatcher.dispatchEvent(this, "GotProgress", progress);
   }
 
   @SimpleEvent(description = "Event indicating that classification has finished successfully. Result is of the form [[class1, confidence1], [class2, confidence2], ..., [class10, confidence10]].")
-  public void GotText(String result) {
-    EventDispatcher.dispatchEvent(this, "GotText", result);
+  public void GotText(String text) {
+    EventDispatcher.dispatchEvent(this, "GotText", text);
+  }
+
+  @SimpleEvent(description = "temp")
+  public void GotFilteredText(String text) {
+    EventDispatcher.dispatchEvent(this, "GotFilteredText", text);
+  }
+
+  @SimpleEvent(description = "temp")
+  public void GotWords(YailList result) {
+    EventDispatcher.dispatchEvent(this, "GotWords", result);
   }
 
   @Override
@@ -159,8 +183,8 @@ public final class OCR extends AndroidViewComponent implements Component {
     }
 
     @JavascriptInterface
-    public void reportProgress(final String progress) {
-      Log.d(LOG_TAG, "Entered reportProgress: " + progress);
+    public void gotProgress(final String progress) {
+      Log.d(LOG_TAG, "Entered gotProgress: " + progress);
       form.runOnUiThread(new Runnable() {
         @Override
         public void run() {
@@ -170,12 +194,12 @@ public final class OCR extends AndroidViewComponent implements Component {
     }
 
     @JavascriptInterface
-    public void reportResult(final String result) {
-      Log.d(LOG_TAG, "Entered reportResult: " + result);
+    public void gotText(final String text) {
+      Log.d(LOG_TAG, "Entered gotText: " + text);
       form.runOnUiThread(new Runnable() {
         @Override
         public void run() {
-          GotText(result);
+          GotText(text);
         }
       });
       /*
@@ -199,6 +223,38 @@ public final class OCR extends AndroidViewComponent implements Component {
         ClassificationFailed();
       }
       */
+    }
+
+    @JavascriptInterface
+    public void gotFilteredText(final String filteredText) {
+      Log.d(LOG_TAG, "Entered gotFilteredText: " + filteredText);
+      form.runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+          GotFilteredText(filteredText);
+        }
+      });
+    }
+
+    @JavascriptInterface
+    public void gotWords(final String result) {
+      Log.d(LOG_TAG, "Entered gotWords: " + result);
+      form.runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            JSONArray list = new JSONArray(result);
+            YailList intermediateList = YailList.makeList(JsonUtil.getListFromJsonArray(list));
+            final List resultList = new ArrayList();
+            for (int i = 0; i < intermediateList.size(); i++) {
+              resultList.add(YailList.makeList((List) intermediateList.getObject(i)));
+            }
+            GotWords(YailList.makeList(resultList));
+          } catch (JSONException e) {
+            e.printStackTrace();
+          }
+        }
+      });
     }
   }
 }

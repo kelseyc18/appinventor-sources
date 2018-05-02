@@ -4801,6 +4801,14 @@ public interface OdeMessages extends Messages {
   @Description("")
   String GotProgressEvents();
 
+  @DefaultMessage("GotFilteredText")
+  @Description("")
+  String GotFilteredTextEvents();
+
+  @DefaultMessage("GotWords")
+  @Description("")
+  String GotWordsEvents();
+
   //Methods
   @DefaultMessage("ResolveActivity")
   @Description("")
@@ -7123,4 +7131,16 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("RecognizeVideoData")
   @Description("")
   String RecognizeVideoDataMethods();
+
+  @DefaultMessage("DrawBoundingBox")
+  @Description("")
+  String DrawBoundingBoxMethods();
+
+  @DefaultMessage("index")
+  @Description("")
+  String indexParams();
+
+  @DefaultMessage("progress")
+  @Description("")
+  String progressParams();
 }
