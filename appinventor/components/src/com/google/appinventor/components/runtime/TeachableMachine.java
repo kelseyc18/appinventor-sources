@@ -1,14 +1,10 @@
 // -*- mode: java; c-basic-offset: 2; -*-
-// Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright 2018 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.components.runtime;
 
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
@@ -16,7 +12,6 @@ import android.webkit.WebViewClient;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.PermissionRequest;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.SimpleEvent;
@@ -26,10 +21,8 @@ import com.google.appinventor.components.annotations.UsesAssets;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.YaVersion;
-import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.runtime.util.IOUtils;
 import com.google.appinventor.components.runtime.util.JsonUtil;
-import com.google.appinventor.components.runtime.util.MediaUtil;
 import com.google.appinventor.components.runtime.util.YailList;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,6 +42,9 @@ import static android.net.Uri.encode;
 
 /**
  * Component for teaching a machine to recognize different images.
+ *
+ * @author kevinzhu@mit.edu (Kevin Zhu)
+ * @author kelseyc@mit.edu (Kelsey Chan)
  */
 
 @DesignerComponent(version = YaVersion.TEACHABLEMACHINE_COMPONENT_VERSION,
@@ -62,6 +58,15 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
   private static final String MODEL_DIRECTORY = "/sdcard/AppInventor/assets/TeachableMachine/";
 
   private static final String MODEL_PREFIX = "https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/";
+
+  // other error codes are defined in teachablemachine.js
+  private static final int ERROR_CLASSIFICATION_NOT_SUPPORTED = -1;
+  private static final int ERROR_CLASSIFICATION_FAILED = -2;
+  private static final int ERROR_LOAD_MODEL_FAILED_BAD_FILE_FORMAT = -3;
+  private static final int ERROR_LOAD_MODEL_FAILED_TOO_MANY_CLASSES = -4;
+  private static final int ERROR_SAVE_MODEL_FAILED = -5;
+  private static final int ERROR_NO_MORE_CLASSES_AVAILABLE = -6;
+  private static final int ERROR_LABEL_DOES_NOT_EXIST = -7;
 
   private final WebView webview;
   private final Form form;
@@ -145,7 +150,7 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
       webview.evaluateJavascript("loadModel(\"" + encode(name) + "\", \"" + encode(model) + "\");", null);
     } catch (IOException e) {
       e.printStackTrace();
-      Error("LoadModel: problem reading model with name " + name);
+      Error(ERROR_LOAD_MODEL_FAILED_BAD_FILE_FORMAT, name);
     }
   }
 
@@ -180,8 +185,8 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
   }
 
   @SimpleEvent(description = "Event indicating that an error has occurred.")
-  public void Error(String message) {
-    EventDispatcher.dispatchEvent(this, "Error", message);
+  public void Error(final int errorCode, final String message) {
+    EventDispatcher.dispatchEvent(this, "Error", errorCode, message);
   }
 
   private void saveModel(String name, String model) {
@@ -194,7 +199,7 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
       out.print(model);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
-      Error("SaveModel: problem saving model with name " + name);
+      Error(ERROR_SAVE_MODEL_FAILED, name);
     } finally {
       IOUtils.closeQuietly(LOG_TAG, out);
     }
@@ -294,12 +299,12 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
     }
 
     @JavascriptInterface
-    public void error(final String message) {
-      Log.d(LOG_TAG, "Entered error: message = " + message);
+    public void error(final int errorCode, final String message) {
+      Log.d(LOG_TAG, "Entered error: message = " + errorCode + ", " + message);
       form.runOnUiThread(new Runnable() {
         @Override
         public void run() {
-          Error(message);
+          Error(errorCode, message);
         }
       });
     }

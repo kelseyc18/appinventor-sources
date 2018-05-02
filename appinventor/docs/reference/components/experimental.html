@@ -632,8 +632,17 @@
   <dd>Indicates that LoadModel with the specified name has completed successfully.</dd>
   <dt><code>DoneSavingModel(text name)</code></dt>
   <dd>Indicates that SaveModel with the specified name has completed successfully.</dd>
-  <dt><code>Error(text message)</code></dt>
+  <dt><code>Error(int errorCode)</code></dt>
   <dd>Indicates that an error has occurred.</dd>
+  <dd>errorCode values:
+    <br>-1 if classification is not supported on the device.
+    <br>-2 if the classification failed.
+    <br>-3 if <code>LoadModel</code> was called with a bad filename.
+    <br>-4 if <code>LoadModel</code> was called with a model that has more than 50 classes.
+    <br>-5 if <code>SaveModel</code> was called with a bad filename.
+    <br>-6 if <code>StartTraining</code> was called when there are already 50 classes.
+    <br>-7 if <code>Clear</code> was called with a label that does not exist.
+  </dd>
   <dt><code>GotClassification(text label)</code></dt>
   <dd>Indicates that classification has finished successfully. Label is the one with the highest confidence. This event is triggered every frame if there is at least one label with samples. It is also triggered once when <code>Clear()</code> is called and will return the empty string if the last label was cleared.</dd>
   <dt><code>GotConfidences(list result)</code></dt>

@@ -1,6 +1,6 @@
 "use strict";
 
-console.log("TeachableMachine: Using Tensorflow.js version " + tf.version.tfjs);
+console.log("TeachableMachine: Using TensorFlow.js version " + tf.version.tfjs);
 
 const MOBILENET_MODEL_PATH = "https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json";
 
@@ -8,6 +8,15 @@ const NUM_CLASSES = 50;
 const IMAGE_SIZE = 224;
 const TOPK = 10;
 const MAX_EXAMPLES = 50;
+
+// make sure error codes are consistent with those defined in TeachableMachine.java
+const ERROR_CLASSIFICATION_NOT_SUPPORTED = -1;
+const ERROR_CLASSIFICATION_FAILED = -2;
+const ERROR_LOAD_MODEL_FAILED_BAD_FILE_FORMAT = -3;
+const ERROR_LOAD_MODEL_FAILED_TOO_MANY_CLASSES = -4;
+const ERROR_SAVE_MODEL_FAILED = -5;
+const ERROR_NO_MORE_CLASSES_AVAILABLE = -6;
+const ERROR_LABEL_DOES_NOT_EXIST = -7;
 
 class KNNImageClassifier {
   constructor(numClasses, k) {
@@ -24,12 +33,17 @@ class KNNImageClassifier {
   }
 
   async load() {
-    this.mobilenet = await tf.loadModel(MOBILENET_MODEL_PATH);
-    const zeros = tf.zeros([1, IMAGE_SIZE, IMAGE_SIZE, 3]);
-    this.mobilenet.predict(zeros).dispose();
-    zeros.dispose();
-    this.varsLoaded = true;
-    console.log("TeachableMachine: KNNImageClassifier ready");
+    try {
+      this.mobilenet = await tf.loadModel(MOBILENET_MODEL_PATH);
+      const zeros = tf.zeros([1, IMAGE_SIZE, IMAGE_SIZE, 3]);
+      this.mobilenet.predict(zeros).dispose();
+      zeros.dispose();
+      this.varsLoaded = true;
+      console.log("TeachableMachine: KNNImageClassifier ready");
+    } catch (error) {
+      console.log("TeachableMachine: " + error);
+      TeachableMachine.error(ERROR_CLASSIFICATION_NOT_SUPPORTED, "");
+    }
   }
 
   clearClass(classIndex) {
@@ -53,61 +67,72 @@ class KNNImageClassifier {
       return;
     }
     this._clearTrainLogitsMatrix();
-    tf.tidy(() => {
-      const logits = tf.tidy(() => {
-        const offset = tf.scalar(127.5);
-        const normalized = image.sub(offset).div(offset);
-        const batched = normalized.reshape([1, IMAGE_SIZE, IMAGE_SIZE, 3]);
-        return this.mobilenet.predict(batched);
+    try {
+      tf.tidy(() => {
+        const logits = tf.tidy(() => {
+          const offset = tf.scalar(127.5);
+          const normalized = image.sub(offset).div(offset);
+          const batched = normalized.reshape([1, IMAGE_SIZE, IMAGE_SIZE, 3]);
+          return this.mobilenet.predict(batched);
+        });
+        const imageLogits = this._normalizeVector(logits);
+        const logitsSize = imageLogits.shape[1];
+        if (this.classLogitsMatrices[classIndex] == null) {
+          this.classLogitsMatrices[classIndex] = imageLogits.as2D(1, logitsSize);
+        } else {
+          const newTrainLogitsMatrix =
+              this.classLogitsMatrices[classIndex]
+                  .as2D(this.classExampleCount[classIndex], logitsSize)
+                  .concat(imageLogits.as2D(1, logitsSize), 0);
+          this.classLogitsMatrices[classIndex].dispose();
+          this.classLogitsMatrices[classIndex] = newTrainLogitsMatrix;
+        }
+        tf.keep(this.classLogitsMatrices[classIndex]);
+        this.classExampleCount[classIndex]++;
       });
-      const imageLogits = this._normalizeVector(logits);
-      const logitsSize = imageLogits.shape[1];
-      if (this.classLogitsMatrices[classIndex] == null) {
-        this.classLogitsMatrices[classIndex] = imageLogits.as2D(1, logitsSize);
-      } else {
-        const newTrainLogitsMatrix =
-            this.classLogitsMatrices[classIndex]
-                .as2D(this.classExampleCount[classIndex], logitsSize)
-                .concat(imageLogits.as2D(1, logitsSize), 0);
-        this.classLogitsMatrices[classIndex].dispose();
-        this.classLogitsMatrices[classIndex] = newTrainLogitsMatrix;
-      }
-      tf.keep(this.classLogitsMatrices[classIndex]);
-      this.classExampleCount[classIndex]++;
-    });
+    } catch (error) {
+      console.log("TeachableMachine: " + error);
+      TeachableMachine.error(ERROR_CLASSIFICATION_NOT_SUPPORTED, "");
+    }
   }
 
   predict(image) {
     if (!this.varsLoaded) {
       throw new Error("Cannot predict until vars have been loaded.");
     }
-    return tf.tidy(() => {
-      const logits = tf.tidy(() => {
-        const offset = tf.scalar(127.5);
-        const normalized = image.sub(offset).div(offset);
-        const batched = normalized.reshape([1, IMAGE_SIZE, IMAGE_SIZE, 3]);
-        return this.mobilenet.predict(batched);
-      });
-      const imageLogits = this._normalizeVector(logits);
-      const logitsSize = imageLogits.shape[1];
-      if (this.trainLogitsMatrix == null) {
-        let newTrainLogitsMatrix = null;
-        for (let i = 0; i < this.numClasses; i++) {
-          newTrainLogitsMatrix = this._concatWithNulls(
-              newTrainLogitsMatrix, this.classLogitsMatrices[i]);
+    try {
+      return tf.tidy(() => {
+        const logits = tf.tidy(() => {
+          const offset = tf.scalar(127.5);
+          const normalized = image.sub(offset).div(offset);
+          const batched = normalized.reshape([1, IMAGE_SIZE, IMAGE_SIZE, 3]);
+          return this.mobilenet.predict(batched);
+        });
+        const imageLogits = this._normalizeVector(logits);
+        const logitsSize = imageLogits.shape[1];
+        if (this.trainLogitsMatrix == null) {
+          let newTrainLogitsMatrix = null;
+          for (let i = 0; i < this.numClasses; i++) {
+            newTrainLogitsMatrix = this._concatWithNulls(
+                newTrainLogitsMatrix, this.classLogitsMatrices[i]);
+          }
+          this.trainLogitsMatrix = newTrainLogitsMatrix;
         }
-        this.trainLogitsMatrix = newTrainLogitsMatrix;
-      }
-      if (this.trainLogitsMatrix == null) {
-        console.warn("Cannot predict without providing training images.");
-        return null;
-      }
-      tf.keep(this.trainLogitsMatrix);
-      const numExamples = this._getNumExamples();
-      return this.trainLogitsMatrix.as2D(numExamples, logitsSize)
-          .matMul(imageLogits.as2D(logitsSize, 1))
-          .as1D();
-    });
+        if (this.trainLogitsMatrix == null) {
+          console.warn("Cannot predict without providing training images.");
+          return null;
+        }
+        tf.keep(this.trainLogitsMatrix);
+        const numExamples = this._getNumExamples();
+        return this.trainLogitsMatrix.as2D(numExamples, logitsSize)
+            .matMul(imageLogits.as2D(logitsSize, 1))
+            .as1D();
+      });
+    } catch (error) {
+      console.log("TeachableMachine: " + error);
+      TeachableMachine.error(ERROR_CLASSIFICATION_NOT_SUPPORTED, "");
+      return null;
+    }
   }
 
   async predictClass(image) {
@@ -388,7 +413,7 @@ function startTraining(encodedLabel) {
   var label = decodeURIComponent(encodedLabel);
   if (!labelToClass.hasOwnProperty(label)) {
     if (availableClasses.length == 0) {
-      TeachableMachine.error("StartTraining: no more classes available to train label " + label);
+      TeachableMachine.error(ERROR_NO_MORE_CLASSES_AVAILABLE, label);
       return;
     }
     var c = availableClasses.shift();
@@ -405,7 +430,7 @@ function stopTraining() {
 function clear(encodedLabel) {
   var label = decodeURIComponent(encodedLabel);
   if (!labelToClass.hasOwnProperty(label)) {
-    TeachableMachine.error("Clear: Label " + label + " does not exist");
+    TeachableMachine.error(ERROR_LABEL_DOES_NOT_EXIST, label);
     return;
   }
   if (training === labelToClass[label]) {
@@ -446,7 +471,7 @@ function loadModel(encodedName, model) {
   var name = decodeURIComponent(encodedName);
   var array = JSON.parse(decodeURIComponent(model));
   if (array.length > 2 * NUM_CLASSES) {
-    TeachableMachine.error("LoadModel: not enough classes available to load model with name " + name);
+    TeachableMachine.error(ERROR_LOAD_MODEL_FAILED_TOO_MANY_CLASSES, name);
     return;
   }
   for (var i = 0; i < NUM_CLASSES; i++) {
