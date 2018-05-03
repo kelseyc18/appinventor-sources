@@ -238,7 +238,9 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
             }
             GotSampleCounts(YailList.makeList(resultList));
           } catch (JSONException e) {
+            Log.d(LOG_TAG, "Entered catch of gotSampleCounts");
             e.printStackTrace();
+            Error(ERROR_CLASSIFICATION_FAILED, "");
           }
         }
       });
@@ -259,7 +261,9 @@ public final class TeachableMachine extends AndroidViewComponent implements Comp
             }
             GotConfidences(YailList.makeList(resultList));
           } catch (JSONException e) {
+            Log.d(LOG_TAG, "Entered catch of gotConfidences");
             e.printStackTrace();
+            Error(ERROR_CLASSIFICATION_FAILED, "");
           }
         }
       });
